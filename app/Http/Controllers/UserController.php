@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Services\UserService;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Validation\ValidationException;
@@ -29,8 +30,8 @@ class UserController extends Controller
                 throw ValidationException::withMessages(['attributes' => ['All input attributes are empty.']]);
             }
             $this->userService->createUser($request->all());
-        } catch (ValidationException | \Exception $exception) {
-            return $this->errorResponseGenerator($exception, $request);
+        } catch (ValidationException | Exception $exception) {
+            return $this->errorResponseGenerator($exception);
         }
         return new Response('Created user successfully!', 201);
     }
@@ -44,7 +45,7 @@ class UserController extends Controller
         try {
             $this->userService = new UserService();
             $usersArray = $this->userService->getAllUsers();
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             return $this->errorResponseGenerator($exception);
         }
         return new Response($usersArray, 200);
@@ -60,14 +61,15 @@ class UserController extends Controller
         try {
             $this->userService = new UserService();
             $userArray = $this->userService->getUser($id);
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             return $this->errorResponseGenerator($exception);
         }
         return new Response($userArray, 200);
     }
 
     /**
-     * Updates a user with the new values that were sent. The values are attached to a user stored in the database that matches the user ID.
+     * Updates a user with the new values that were sent. The values are attached to a user stored in the
+     * database that matches the user ID.
      * @param Request $request
      * @param $id
      * @return Response
@@ -81,8 +83,8 @@ class UserController extends Controller
             }
             $this->userService = new UserService();
             $this->userService->updateUser($requestDataArray, $id);
-        } catch (ValidationException | \Exception $exception) {
-            return $this->errorResponseGenerator($exception, $request);
+        } catch (ValidationException | Exception $exception) {
+            return $this->errorResponseGenerator($exception);
         }
         return new Response('Saved successfully!', 200);
     }
@@ -97,7 +99,7 @@ class UserController extends Controller
         try {
             $this->userService = new UserService();
             $this->userService->deleteUser($id);
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             return $this->errorResponseGenerator($exception);
         }
         return new Response('User deleted successfully!', 200);
@@ -105,25 +107,19 @@ class UserController extends Controller
 
     /**
      * Generates a response for an error based on the Exception that was thrown.
-     * @param ValidationException|\Exception $exception
-     * @param Request|null $request
+     * @param ValidationException|Exception $exception
      * @return Response
      */
-    private function errorResponseGenerator(
-        ValidationException|\Exception $exception,
-        Request $request = null
-    ): Response {
+    private function errorResponseGenerator(ValidationException|Exception $exception): Response
+    {
         if ($exception instanceof ValidationException === false) {
-            $errorMessage = 'Internal server error! Please contact the system administrator and show the following message: '
+            $errorMessage =
+                'Internal server error! Please contact the system administrator and show the following message: '
                 . PHP_EOL . $exception->getMessage()
                 . PHP_EOL . 'With error code: ' . $exception->getCode();
-            if ($exception->getCode() === 400) {
-                return new Response($errorMessage, 400);
-            }
             return new Response($errorMessage, 400);
         }
         $inputErrors = [];
-        $inputData = [];
         foreach ($exception->errors() as $key => $messageArray) {
             $errorMessage = '';
             foreach ($messageArray as $message) {
@@ -131,10 +127,8 @@ class UserController extends Controller
             }
             $inputErrors[$key . 'Error '] = $errorMessage;
         }
-        foreach ($request->all() as $key => $value) {
-            $inputData[$key] = $value;
-        }
-        $dataAndErrorMessageArray = array_merge($inputErrors, $inputData);
+
+        $dataAndErrorMessageArray = $inputErrors;
         return new Response($dataAndErrorMessageArray, 400);
     }
 }

@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\User;
 use App\Models\UserContact;
+use Exception;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
@@ -12,7 +13,7 @@ class UserService
     /**
      * Validates the data, persist the user, and it's contacts in the database.
      * @param array $newUserData
-     * @throws \Exception
+     * @throws Exception
      */
     public function createUser(array $newUserData): void
     {
@@ -46,10 +47,10 @@ class UserService
         ]);
         $saveResult = $user->save();
         if ($saveResult === false) {
-            throw new \Exception('Error! The user could not be saved.', 500);
+            throw new Exception('Error! The user could not be saved.', 500);
         }
         $userId = $user->getAttribute('id');
-        foreach ($newUserData['telephoneNumbers'] as $telephoneNumber) {
+        foreach ($newUserData['telephone_numbers'] as $telephoneNumber) {
             $contact = new UserContact([
                 'user_id' => $userId,
                 'telephone_number' => $telephoneNumber,
@@ -57,7 +58,7 @@ class UserService
             ]);
             $saveResult = $contact->save();
             if ($saveResult === false) {
-                throw new \Exception('Error! The user contact ' . $telephoneNumber . ' could not be saved.', 500);
+                throw new Exception('Error! The user contact ' . $telephoneNumber . ' could not be saved.', 500);
             }
         }
     }
@@ -65,21 +66,21 @@ class UserService
     /**
      * Requests all users that are stored in the database.
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
     public function getAllUsers(): array
     {
         $resultArray = [];
         $allUsersArray = User::all();
         if (empty($allUsersArray->toArray())) {
-            throw new \Exception('There is no user registered.', 404);
+            throw new Exception('There is no user registered.', 404);
         }
         foreach ($allUsersArray as $userArrayKey => $user) {
             $resultArray[$userArrayKey] = $user->toArray();
             $userId = $user->getAttribute('id');
             $userContacts = (new UserContact())->where('user_id', $userId)->get();
             $userContactsArray = $userContacts->toArray();
-            $resultArray[$userArrayKey]['telephoneNumbers'] = $userContactsArray;
+            $resultArray[$userArrayKey]['telephone_numbers'] = $userContactsArray;
         }
         return $resultArray;
     }
@@ -88,18 +89,18 @@ class UserService
      * Gets a specific user matching it's given ID.
      * @param int $id
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
     public function getUser(int $id): array
     {
         $user = (new User())->find($id);
         if ($user === null) {
-            throw new \Exception('This user does not exists in the database.', 404);
+            throw new Exception('This user does not exists in the database.', 404);
         }
         $userArray = $user->toArray();
         $userContacts = (new UserContact())->where('user_id', $id)->get();
         $userContactsArray = $userContacts->toArray();
-        $userArray['telephoneNumbers'] = $userContactsArray;
+        $userArray['telephone_numbers'] = $userContactsArray;
         return $userArray;
     }
 
@@ -107,13 +108,13 @@ class UserService
      * Validates the data, gets a specific user matching it's given ID and update him.
      * @param array $updatedUserData
      * @param $userId
-     * @throws \Exception
+     * @throws Exception
      */
     public function updateUser(array $updatedUserData, $userId): void
     {
         $user = (new User())->find($userId);
         if (empty($user)) {
-            throw new \Exception('This user does not exists in the database.', 404);
+            throw new Exception('This user does not exists in the database.', 404);
         }
         foreach ($updatedUserData as $key => $value) {
             $this->validateUpdatedUserData($key, $value, $userId);
@@ -133,33 +134,35 @@ class UserService
                 case 'cpf':
                     $user->cpf = $value;
                     break;
-                case 'telephoneNumbers':
+                case 'telephone_numbers':
                     foreach ($value as $updatedContact) {
-                        $contact = (new UserContact())->find($updatedContact['telephoneId']);
+                        $contact = (new UserContact())->find($updatedContact['id']);
                         if (is_null($contact)) {
-                            throw new \Exception(
-                                'Error! The contact id ' . $updatedContact['telephoneId'] . ' does not exists.',
+                            throw new Exception(
+                                'Error! The contact id ' . $updatedContact['id'] . ' does not exists.',
                                 404
                             );
                         }
-                        $contact->telephone_number = $updatedContact['telephoneNumber'];
+                        $contact->telephone_number = $updatedContact['telephone_number'];
                         $saveResult = $contact->save();
                         if ($saveResult === false) {
-                            throw new \Exception(
-                                'Error! The user contact ' . $updatedContact['telephoneNumber'] . ' could not be saved.',
+                            throw new Exception(
+                                'Error! The user contact ' . $updatedContact['telephone_number'] .
+                                ' could not be saved.',
                                 500
                             );
                         }
                     }
                     break;
                 default:
-                    $errorMessage = 'The inputted attribute ' . $key . ' does not match the specified fields. Please input only the specified fields.';
-                    throw new \Exception($errorMessage, 400);
+                    $errorMessage = 'The inputted attribute ' . $key .
+                        ' does not match the specified fields. Please input only the specified fields.';
+                    throw new Exception($errorMessage, 400);
             }
         }
         $saveResult = $user->save();
         if ($saveResult === false) {
-            throw new \Exception('Error! The user could not be saved.', 500);
+            throw new Exception('Error! The user could not be saved.', 500);
         }
     }
 
@@ -168,7 +171,7 @@ class UserService
      * @param string $key
      * @param $value
      * @param $userId
-     * @throws \Exception
+     * @throws Exception
      */
     private function validateUpdatedUserData(string $key, $value, $userId): void
     {
@@ -196,58 +199,63 @@ class UserService
                     ]
                 );
                 break;
-            case 'telephoneNumbers':
+            case 'telephone_numbers':
                 Validator::validate(
                     $value,
                     [
-                        '*.telephoneNumber' => [
+                        '*.telephone_number' => [
                             'required',
                             'celular_com_ddd'
                         ]
                     ],
                     [
-                        'celular_com_ddd' => 'The field :attribute does not contains a telephone number in the following format: (00) 00000-0000 or (00) 0000-0000'
+                        'celular_com_ddd' =>
+                            'The field :attribute does not contains a telephone number in the following format:' .
+                            ' (00) 00000-0000 or (00) 0000-0000'
                     ]
                 );
                 foreach ($value as $userUpdatedContact) {
-                    $userContact = (new UserContact())->find($userUpdatedContact['telephoneId']);
+                    $userContact = (new UserContact())->find($userUpdatedContact['id']);
                     if (is_null($userContact)) {
-                        $errorMessage = 'The contact with ID: ' . $userUpdatedContact['telephoneId'] . ' does not exists!';
-                        throw new \Exception($errorMessage, 400);
+                        $errorMessage = 'The contact with ID: ' . $userUpdatedContact['id'] .
+                            ' does not exists!';
+                        throw new Exception($errorMessage, 400);
                     }
                     if ($userContact->user_id != $userId) {
-                        $errorMessage = 'The contact with ID: ' . $userUpdatedContact['telephoneId'] . ' does not belongs to user ID: ' . $userId . '.';
-                        throw new \Exception($errorMessage, 400);
+                        $errorMessage = 'The contact with ID: ' . $userUpdatedContact['id'] .
+                            ' does not belongs to user ID: ' . $userId . '.';
+                        throw new Exception($errorMessage, 400);
                     }
                 }
                 break;
             default:
-                $errorMessage = 'The inputted attribute ' . $key . ' does not match the specified fields. Please input only the specified fields.';
-                throw new \Exception($errorMessage, 400);
+                $errorMessage = 'The inputted attribute ' . $key .
+                    ' does not match the specified fields. Please input only the specified fields.';
+                throw new Exception($errorMessage, 400);
         }
     }
 
     /**
      * Deletes a specific user, and it's contacts from the database.
      * @param int $id
-     * @throws \Exception
+     * @throws Exception
      */
     public function deleteUser(int $id): void
     {
         $user = (new User())->find($id);
         if (empty($user)) {
-            throw new \Exception('This user does not exists in the database.', 400);
+            throw new Exception('This user does not exists in the database.', 400);
         }
         $userContacts = (new UserContact())->where('user_id', $id)->get();
         foreach ($userContacts as $contact) {
             $deleteResult = $contact->delete();
             if ($deleteResult === false) {
-                throw new \Exception('Error! One of the contacts of the user could not be deleted.', 500);
+                throw new Exception('Error! One of the contacts of the user could not be deleted.', 500);
             }
         }
         $deleteResult = $user->delete();
         if ($deleteResult === false) {
-            throw new \Exception('Error! One of the contacts of the user could not be deleted.', 500);
+            throw new Exception('Error! One of the contacts of the user could not be deleted.', 500);
         }
     }
 
@@ -263,12 +271,13 @@ class UserService
                 'name' => ['required'],
                 'email' => ['required', 'email:rfc,dns'],
                 'cpf' => ['required', 'formato_cpf', 'cpf', 'unique:users,cpf'],
-                'telephoneNumbers.*' => ['required', 'celular_com_ddd']
+                'telephone_numbers.*' => ['required', 'celular_com_ddd']
             ],
             [
                 'formato_cpf' => 'The field :attribute does not contain a valid CPF format.',
                 'cpf' => 'The field :attribute does not contain a valid CPF.',
-                'celular_com_ddd' => 'The field :attribute does not contains a telephone number in the following format: (00) 00000-0000 or (00) 0000-0000'
+                'celular_com_ddd' => 'The field :attribute does not contains a telephone number in the' .
+                    ' following format: (00) 00000-0000 or (00) 0000-0000'
             ]
         );
     }
