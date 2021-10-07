@@ -14,7 +14,7 @@ class UserContact extends Model
      *
      * @var array
      */
-    protected $fillable = [
+    protected array $fillable = [
         'user_id',
         'telephone_number',
         'created_by'

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\Handler;
 use App\Services\UserService;
 use Exception;
 use Illuminate\Http\Request;
@@ -11,10 +12,12 @@ use Illuminate\Validation\ValidationException;
 class UserController extends Controller
 {
     private UserService $userService;
+    private Handler $handler;
 
     public function __construct()
     {
         $this->userService = new UserService();
+        $this->handler = new Handler();
     }
 
     /**
@@ -105,30 +108,45 @@ class UserController extends Controller
         return new Response('User deleted successfully!', 200);
     }
 
-    /**
-     * Generates a response for an error based on the Exception that was thrown.
-     * @param ValidationException|Exception $exception
-     * @return Response
-     */
-    private function errorResponseGenerator(ValidationException|Exception $exception): Response
-    {
-        if ($exception instanceof ValidationException === false) {
-            $errorMessage =
-                'Internal server error! Please contact the system administrator and show the following message: '
-                . PHP_EOL . $exception->getMessage()
-                . PHP_EOL . 'With error code: ' . $exception->getCode();
-            return new Response($errorMessage, 400);
-        }
-        $inputErrors = [];
-        foreach ($exception->errors() as $key => $messageArray) {
-            $errorMessage = '';
-            foreach ($messageArray as $message) {
-                $errorMessage .= ' ' . $message;
-            }
-            $inputErrors[$key . 'Error '] = $errorMessage;
-        }
+//    /**
+//     * Generates a response for an error based on the Exception that was thrown.
+//     * @param ValidationException|Exception $exception
+//     * @return Response
+//     */
+//    private function errorResponseGenerator(ValidationException|Exception $exception): Response
+//    {
+//        if ($exception instanceof ValidationException === false) {
+//            $errorMessage =
+//                'Internal server error! Please contact the system administrator and show the following message: '
+//                . PHP_EOL . $exception->getMessage()
+//                . PHP_EOL . 'With error code: ' . $exception->getCode();
+//            return new Response($errorMessage, 400);
+//        }
+//        $inputErrors = [];
+//        foreach ($exception->errors() as $key => $messageArray) {
+//            $errorMessage = '';
+//            foreach ($messageArray as $message) {
+//                $errorMessage .= ' ' . $message;
+//            }
+//            $inputErrors[$key . 'Error '] = $errorMessage;
+//        }
+//
+//        $dataAndErrorMessageArray = $inputErrors;
+//        return new Response($dataAndErrorMessageArray, 400);
+//    }
 
-        $dataAndErrorMessageArray = $inputErrors;
-        return new Response($dataAndErrorMessageArray, 400);
+    public function register()
+    {
+        $this->handler->renderable(function (ValidationException $exception) {
+            return \response()->json([
+                'message' => $exception->getMessage()
+            ], 400);
+        });
+
+        $this->handler->renderable(function (Exception $exception) {
+            return \response()->json([
+                'message' => $exception->errors()
+            ], 400);
+        });
     }
 }

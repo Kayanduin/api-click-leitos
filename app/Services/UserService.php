@@ -73,7 +73,7 @@ class UserService
         $resultArray = [];
         $allUsersArray = User::all();
         if (empty($allUsersArray->toArray())) {
-            throw new Exception('There is no user registered.', 404);
+            throw new Exception('There is no user registered.', 200);
         }
         foreach ($allUsersArray as $userArrayKey => $user) {
             $resultArray[$userArrayKey] = $user->toArray();
@@ -155,9 +155,7 @@ class UserService
                     }
                     break;
                 default:
-                    $errorMessage = 'The inputted attribute ' . $key .
-                        ' does not match the specified fields. Please input only the specified fields.';
-                    throw new Exception($errorMessage, 400);
+                    break;
             }
         }
         $saveResult = $user->save();
@@ -229,9 +227,7 @@ class UserService
                 }
                 break;
             default:
-                $errorMessage = 'The inputted attribute ' . $key .
-                    ' does not match the specified fields. Please input only the specified fields.';
-                throw new Exception($errorMessage, 400);
+                break;
         }
     }
 

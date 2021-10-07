@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-
 class User extends Model
 {
     use HasFactory;
@@ -15,7 +14,7 @@ class User extends Model
      *
      * @var array
      */
-    protected $fillable = [
+    protected array $fillable = [
         'name',
         'email',
         'password',
@@ -27,7 +26,7 @@ class User extends Model
      *
      * @var array
      */
-    protected $hidden = [
+    protected array $hidden = [
         'password',
     ];
 
@@ -36,7 +35,7 @@ class User extends Model
      *
      * @var array
      */
-    protected $visible = [
+    protected array $visible = [
         'id',
         'name',
         'email',
@@ -45,5 +44,4 @@ class User extends Model
         'created_at',
         'updated_at'
     ];
-
 }
