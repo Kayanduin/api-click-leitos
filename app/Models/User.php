@@ -2,9 +2,13 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @mixin Builder
+ */
 class User extends Model
 {
     use HasFactory;
@@ -44,4 +48,9 @@ class User extends Model
         'created_at',
         'updated_at'
     ];
+
+    public function user()
+    {
+        return $this->hasMany(UserContact::class);
+    }
 }

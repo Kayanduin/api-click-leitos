@@ -2,22 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Exceptions\Handler;
+use App\Models\UserContact;
 use App\Services\UserService;
-use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
 {
-    private UserService $userService;
-
-    public function __construct()
-    {
-        $this->userService = new UserService();
-    }
-
     /**
      * Creates a new user in the database.
      * @param Request $request
@@ -25,15 +17,36 @@ class UserController extends Controller
      */
     public function createUser(Request $request): Response
     {
-        try {
-            $requestDataArray = $request->all();
-            if (empty($requestDataArray)) {
-                throw ValidationException::withMessages(['attributes' => ['All input attributes are empty.']]);
-            }
-            $this->userService->createUser($request->all());
-        } catch (ValidationException | Exception $exception) {
-            return $this->errorResponseGenerator($exception);
+        $requestData = $request->all();
+        $validator = Validator::make(
+            $requestData,
+            [
+                'name' => ['required'],
+                'password' => ['required'],
+                'email' => ['required', 'email:rfc,dns'],
+                'cpf' => ['required', 'formato_cpf', 'cpf', 'unique:users,cpf'],
+                'telephone_numbers' => ['required'],
+                'telephone_numbers.*' => ['required', 'celular_com_ddd']
+            ],
+            [
+                'formato_cpf' => 'The field :attribute does not contain a valid CPF format.',
+                'cpf' => 'The field :attribute does not contain a valid CPF.',
+                'celular_com_ddd' => 'The field :attribute does not contains a telephone number in the' .
+                    ' following format: (00) 00000-0000 or (00) 0000-0000'
+            ]
+        );
+
+        if ($validator->fails()) {
+            $errors = $validator->errors();
+            return new Response(['errors' => $errors->all()], 400);
         }
+
+        $userService = new UserService();
+
+        if (!$userService->createUser($requestData)) {
+            return new Response(['errors' => 'Error! The user could not be created.'], 500);
+        }
+
         return new Response('Created user successfully!', 201);
     }
 
@@ -43,13 +56,12 @@ class UserController extends Controller
      */
     public function getAllUsers(): Response
     {
-        try {
-            $this->userService = new UserService();
-            $usersArray = $this->userService->getAllUsers();
-        } catch (Exception $exception) {
-            return $this->errorResponseGenerator($exception);
+        $userService = new UserService();
+        $usersArray = $userService->getAllUsers();
+        if (is_array($usersArray)) {
+            return new Response($usersArray, 200);
         }
-        return new Response($usersArray, 200);
+        return new Response('There is no user registered.', 200);
     }
 
     /**
@@ -59,12 +71,20 @@ class UserController extends Controller
      */
     public function getUser($id): Response
     {
-        try {
-            $this->userService = new UserService();
-            $userArray = $this->userService->getUser($id);
-        } catch (Exception $exception) {
-            return $this->errorResponseGenerator($exception);
+        $requestData['id'] = $id;
+        $validator = Validator::make(
+            $requestData,
+            [
+                'id' => ['required', 'exists:users,id']
+            ]
+        );
+        if ($validator->fails()) {
+            $errors = $validator->errors();
+            return new Response(['errors' => $errors->all()], 400);
         }
+        $userService = new UserService();
+        $userArray = $userService->getUser($id);
+
         return new Response($userArray, 200);
     }
 
@@ -77,17 +97,43 @@ class UserController extends Controller
      */
     public function updateUser(Request $request, $id): Response
     {
-        try {
-            $requestDataArray = $request->all();
-            if (empty($requestDataArray)) {
-                throw ValidationException::withMessages(['attributes' => ['All input attributes are empty.']]);
-            }
-            $this->userService = new UserService();
-            $this->userService->updateUser($requestDataArray, $id);
-        } catch (ValidationException | Exception $exception) {
-            return $this->errorResponseGenerator($exception);
+        $requestData = $request->all();
+        $requestData['id'] = $id;
+        $validator = Validator::make(
+            $requestData,
+            [
+                'id' => ['required', 'exists:users,id'],
+                'name' => ['sometimes', 'required'],
+                'password' => ['sometimes', 'required'],
+                'email' => ['sometimes', 'required', 'email:rfc,dns'],
+                'cpf' => ['sometimes', 'required', 'formato_cpf', 'cpf', 'unique:users,cpf'],
+                'telephone_numbers' => ['sometimes', 'required'],
+                'telephone_numbers.*.id' => ['required', 'exists:user_contacts,id'],
+                'telephone_numbers.*.telephone_number' => ['required', 'celular_com_ddd']
+            ],
+            [
+                'formato_cpf' => 'The field :attribute does not contain a valid CPF format.',
+                'cpf' => 'The field :attribute does not contain a valid CPF.',
+                'celular_com_ddd' => 'The field :attribute does not contains a telephone number in the' .
+                    ' following format: (00) 00000-0000 or (00) 0000-0000'
+            ]
+        );
+        if ($validator->fails()) {
+            $errors = $validator->errors();
+            return new Response(['errors' => $errors->all()], 400);
         }
-        return new Response('Saved successfully!', 200);
+        foreach ($requestData['telephone_numbers'] as $inputedContact) {
+            $contact = UserContact::find($inputedContact['id']);
+            if ($contact->user_id != $id) {
+                $errorMessage = 'One of the updated contacts doesn\'t belongs to the inputed user.';
+                return new Response(['errors' => $errorMessage], 400);
+            }
+        }
+        $userService = new UserService();
+        if ($userService->updateUser($requestData, $id)) {
+            return new Response('Saved successfully!', 200);
+        }
+        return new Response(['errors' => 'Error! The user could not be saved.'], 400);
     }
 
     /**
@@ -97,54 +143,22 @@ class UserController extends Controller
      */
     public function deleteUser($id): Response
     {
-        try {
-            $this->userService = new UserService();
-            $this->userService->deleteUser($id);
-        } catch (Exception $exception) {
-            return $this->errorResponseGenerator($exception);
+        $requestData['id'] = $id;
+        $validator = Validator::make(
+            $requestData,
+            [
+                'id' => ['required', 'exists:users,id']
+            ]
+        );
+        if ($validator->fails()) {
+            $errors = $validator->errors();
+            return new Response(['errors' => $errors->all()], 400);
         }
-        return new Response('User deleted successfully!', 200);
+
+        $userService = new UserService();
+        if ($userService->deleteUser($id)) {
+            return new Response('Deleted successfully!', 200);
+        }
+        return new Response(['errors' => 'Error! Failed to delete the contact.'], 500);
     }
-
-    /**
-     * Generates a response for an error based on the Exception that was thrown.
-     * @param ValidationException|Exception $exception
-     * @return Response
-     */
-    private function errorResponseGenerator(ValidationException|Exception $exception): Response
-    {
-        if ($exception instanceof ValidationException === false) {
-            $errorMessage =
-                'Internal server error! Please contact the system administrator and show the following message: '
-                . PHP_EOL . $exception->getMessage()
-                . PHP_EOL . 'With error code: ' . $exception->getCode();
-            return new Response($errorMessage, 400);
-        }
-        $inputErrors = [];
-        foreach ($exception->errors() as $key => $messageArray) {
-            $errorMessage = '';
-            foreach ($messageArray as $message) {
-                $errorMessage .= ' ' . $message;
-            }
-            $inputErrors[$key . 'Error '] = $errorMessage;
-        }
-
-        $dataAndErrorMessageArray = $inputErrors;
-        return new Response($dataAndErrorMessageArray, 400);
-    }
-
-//    public function register()
-//    {
-//        $this->handler->renderable(function (ValidationException $exception) {
-//            return \response()->json([
-//                'message' => $exception->getMessage()
-//            ], 400);
-//        });
-//
-//        $this->handler->renderable(function (Exception $exception) {
-//            return \response()->json([
-//                'message' => $exception->errors()
-//            ], 400);
-//        });
-//    }
 }
