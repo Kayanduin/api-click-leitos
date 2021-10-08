@@ -22,7 +22,6 @@ class UserController extends Controller
             $requestData,
             [
                 'name' => ['required'],
-                'password' => ['required'],
                 'email' => ['required', 'email:rfc,dns'],
                 'cpf' => ['required', 'formato_cpf', 'cpf', 'unique:users,cpf'],
                 'telephone_numbers' => ['required'],
