@@ -46,7 +46,7 @@ class UserController extends Controller
             return new Response(['errors' => 'Error! The user could not be created.'], 500);
         }
 
-        return new Response('Created user successfully!', 201);
+        return new Response(['message' => 'Created user successfully!'], 201);
     }
 
     /**
@@ -60,7 +60,7 @@ class UserController extends Controller
         if (is_array($usersArray)) {
             return new Response($usersArray, 200);
         }
-        return new Response('There is no user registered.', 200);
+        return new Response(['message' => 'There is no user registered.'], 200);
     }
 
     /**
@@ -130,7 +130,7 @@ class UserController extends Controller
         }
         $userService = new UserService();
         if ($userService->updateUser($requestData, $id)) {
-            return new Response('Saved successfully!', 200);
+            return new Response(['message' => 'Saved successfully!'], 200);
         }
         return new Response(['errors' => 'Error! The user could not be saved.'], 400);
     }
@@ -156,7 +156,7 @@ class UserController extends Controller
 
         $userService = new UserService();
         if ($userService->deleteUser($id)) {
-            return new Response('Deleted successfully!', 200);
+            return new Response(['message' => 'Deleted successfully!'], 200);
         }
         return new Response(['errors' => 'Error! Failed to delete the contact.'], 500);
     }
