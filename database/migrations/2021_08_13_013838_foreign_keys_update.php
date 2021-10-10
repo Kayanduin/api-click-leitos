@@ -42,12 +42,8 @@ class ForeignKeysUpdate extends Migration
 
         Schema::table('cities', function (Blueprint $table) {
             $table->foreign('state_id')->references('id')->on('states');
-            $table->foreign('created_by')->references('id')->on('users');
         });
 
-        Schema::table('states', function (Blueprint $table) {
-            $table->foreign('created_by')->references('id')->on('users');
-        });
         Schema::table('bed_types', function (Blueprint $table) {
             $table->foreign('created_by')->references('id')->on('users');
         });

@@ -13,12 +13,10 @@ class StatesTable extends Migration
      */
     public function up()
     {
-        Schema::create('states', function (Blueprint $table){
+        Schema::create('states', function (Blueprint $table) {
             $table->id();
             $table->string('name')->nullable(false);
             $table->string('initials')->nullable(false);
-            $table->string('region')->nullable(false);
-            $table->bigInteger('created_by', false,true)->nullable(false);
             $table->timestamps();
         });
     }

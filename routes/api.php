@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AddressController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -21,6 +22,12 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::get('/user', [UserController::class, 'getAllUsers']);
 Route::post('/user', [UserController::class, 'createUser']);
-Route::get('/user/{id}', [UserController::class, 'getUser'])->where('id', '[0-9]+');
-Route::put('/user/{id}', [UserController::class, 'updateUser'])->where('id', '[0-9]+');
-Route::delete('/user/{id}', [UserController::class, 'deleteUser'])->where('id', '[0-9]+');
+Route::get('/user/{id}', [UserController::class, 'getUser'])
+    ->where('id', '[0-9]+');
+Route::put('/user/{id}', [UserController::class, 'updateUser'])
+    ->where('id', '[0-9]+');
+Route::delete('/user/{id}', [UserController::class, 'deleteUser'])
+    ->where('id', '[0-9]+');
+Route::get('states', [AddressController::class, 'getStates']);
+Route::get('state-cities/{id}', [AddressController::class, 'getCitiesByState'])
+    ->where('id', '[0-9]+');
