@@ -13,7 +13,7 @@ class HealthUnitiesContacts extends Migration
      */
     public function up()
     {
-        Schema::create('health_unities_contacts', function (Blueprint $table) {
+        Schema::create('health_unity_contacts', function (Blueprint $table) {
             $table->id();
             $table->bigInteger('health_unity_id', false, true)->nullable(false);
             $table->string('telephone_number')->nullable(false);

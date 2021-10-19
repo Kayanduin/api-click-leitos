@@ -17,6 +17,7 @@ class AddressesTable extends Migration
             $table->id();
             $table->string('address')->nullable(false);
             $table->bigInteger('address_number', false, true)->nullable(false);
+            $table->string('district')->nullable(false);
             $table->bigInteger('city_id', false, true)->nullable(false);
             $table->bigInteger('created_by', false, true)->nullable(false);
             $table->timestamps();

@@ -22,11 +22,11 @@ class ForeignKeysUpdate extends Migration
             $table->foreign('user_id')->references('id')->on('users');
         });
 
-        Schema::table('samu_unities_contacts', function (Blueprint $table) {
+        Schema::table('samu_unity_contacts', function (Blueprint $table) {
             $table->foreign('samu_unity_id')->references('id')->on('samu_unities');
         });
 
-        Schema::table('health_unities_contacts', function (Blueprint $table) {
+        Schema::table('health_unity_contacts', function (Blueprint $table) {
             $table->foreign('health_unity_id')->references('id')->on('health_unities');
         });
 

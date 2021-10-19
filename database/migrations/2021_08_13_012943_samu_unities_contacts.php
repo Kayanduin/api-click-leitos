@@ -13,7 +13,7 @@ class SamuUnitiesContacts extends Migration
      */
     public function up()
     {
-        Schema::create('samu_unities_contacts', function (Blueprint $table) {
+        Schema::create('samu_unity_contacts', function (Blueprint $table) {
             $table->id();
             $table->bigInteger('samu_unity_id', false, true)->nullable(false);
             $table->string('telephone_number')->nullable(false);
