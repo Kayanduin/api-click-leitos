@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\HealthUnityContact;
-use App\Services\HealthUnityService;
+use App\Models\HealthUnitContact;
+use App\Services\HealthUnitService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
-class HealthUnityController extends Controller
+class HealthUnitController extends Controller
 {
-    public function createHealthUnity(Request $request): Response
+    public function createHealthUnit(Request $request): Response
     {
         $requestData = $request->all();
 
@@ -22,7 +22,7 @@ class HealthUnityController extends Controller
                 'address' => ['required'],
                 'address_number' => ['required'],
                 'district' => ['required'],
-                'city_id' => ['required', 'integer'],
+                'city_id' => ['required', 'integer', 'exists:cities,id'],
                 'telephone_numbers' => ['required'],
                 'telephone_numbers.*' => ['required', 'celular_com_ddd']
             ],
@@ -41,30 +41,30 @@ class HealthUnityController extends Controller
         } catch (ValidationException $exception) {
             return new Response(['errors' => $exception->getMessage()], 500);
         }
-        $healthUnityService = new HealthUnityService();
-        $isHealthUnityCreated = $healthUnityService->createHealthUnity($validatedData);
+        $healthUnitService = new HealthUnitService();
+        $isHealthUnitCreated = $healthUnitService->createHealthUnit($validatedData);
 
-        if (!$isHealthUnityCreated) {
-            return new Response(['errors' => 'Error! The user could not be created.'], 500);
+        if (!$isHealthUnitCreated) {
+            return new Response(['errors' => 'Error! The health unit could not be created.'], 500);
         }
-        return new Response(['message' => 'Health unity created successfully!'], 201);
+        return new Response(['message' => 'Health unit created successfully!'], 201);
     }
 
-    public function updateHealthUnity(Request $request, $healthUnityId): Response
+    public function updateHealthUnit(Request $request, $healthUnitId): Response
     {
         $requestData = $request->all();
-        $requestData['healthUnityId'] = $healthUnityId;
+        $requestData['healthUnitId'] = $healthUnitId;
         $validator = Validator::make(
             $requestData,
             [
-                'healthUnityId' => ['required', 'exists:health_unities,id'],
+                'healthUnitId' => ['required', 'exists:health_units,id'],
                 'name' => ['sometimes', 'required'],
                 'address' => ['sometimes', 'required'],
                 'address_number' => ['sometimes', 'required'],
                 'district' => ['sometimes', 'required'],
-                'city_id' => ['sometimes', 'required', 'integer'],
+                'city_id' => ['sometimes', 'required', 'integer', 'exists:cities,id'],
                 'telephone_numbers' => ['sometimes', 'required'],
-                'telephone_numbers.*.id' => ['required', 'exists:health_unities_contacts,id'],
+                'telephone_numbers.*.id' => ['required', 'exists:health_units_contacts,id'],
                 'telephone_numbers.*.telephone_number' => ['required', 'celular_com_ddd']
             ],
             [
@@ -78,9 +78,9 @@ class HealthUnityController extends Controller
         }
         if (array_key_exists('telephone_numbers', $requestData)) {
             foreach ($requestData['telephone_numbers'] as $inputtedContact) {
-                $contact = (new HealthUnityContact())->find($inputtedContact['id']);
-                if ($contact->health_unity_id != $healthUnityId) {
-                    $errorMessage = 'One of the updated contacts doesn\'t belongs to the inputted health unity.';
+                $contact = (new HealthUnitContact())->find($inputtedContact['id']);
+                if ($contact->health_unit_id != $healthUnitId) {
+                    $errorMessage = 'One of the updated contacts doesn\'t belongs to the inputted health unit.';
                     return new Response(['errors' => $errorMessage], 400);
                 }
             }
@@ -90,62 +90,62 @@ class HealthUnityController extends Controller
         } catch (ValidationException $exception) {
             return new Response(['errors' => $exception->getMessage()], 500);
         }
-        $healthUnityService = new HealthUnityService();
-        $isHealthUnityUpdated = $healthUnityService->updateHealthUnity($validatedData);
+        $healthUnitService = new HealthUnitService();
+        $isHealthUnitUpdated = $healthUnitService->updateHealthUnit($validatedData);
 
-        if (!$isHealthUnityUpdated) {
-            return new Response(['errors' => 'Error! The user could not be created.'], 500);
+        if (!$isHealthUnitUpdated) {
+            return new Response(['errors' => 'Error! The health unit could not be updated.'], 500);
         }
-        return new Response(['message' => 'Health unity updated successfully!'], 200);
+        return new Response(['message' => 'Health unit updated successfully!'], 200);
     }
 
-    public function getHealthUnity(int $healthUnityId): Response
+    public function getHealthUnit(int $healthUnitId): Response
     {
-        $requestData['healthUnityId'] = $healthUnityId;
+        $requestData['healthUnitId'] = $healthUnitId;
         $validator = Validator::make(
             $requestData,
             [
-                'healthUnityId' => ['required', 'exists:health_unities,id']
+                'healthUnitId' => ['required', 'exists:health_units,id']
             ]
         );
         if ($validator->fails()) {
             $errors = $validator->errors();
             return new Response(['errors' => $errors->all()], 400);
         }
-        $healthUnityService = new HealthUnityService();
-        $userArray = $healthUnityService->getHealthUnity($healthUnityId);
+        $healthUnitService = new HealthUnitService();
+        $healthUnit = $healthUnitService->getHealthUnit($healthUnitId);
 
-        return new Response($userArray, 200);
+        return new Response($healthUnit, 200);
     }
 
-    public function getAllHealthUnities(): Response
+    public function getAllHealthUnits(): Response
     {
-        $healthUnityService = new HealthUnityService();
-        $healthUnities = $healthUnityService->getAllHealthUnities();
-        if (is_array($healthUnities)) {
-            return new Response($healthUnities, 200);
+        $healthUnitService = new HealthUnitService();
+        $healthUnits = $healthUnitService->getAllHealthUnits();
+        if (is_array($healthUnits)) {
+            return new Response($healthUnits, 200);
         }
-        return new Response(['message' => 'There is no health unity registered.'], 200);
+        return new Response(['message' => 'There is no health unit registered.'], 200);
     }
 
-    public function deleteHealthUnity(int $healthUnityId): Response
+    public function deleteHealthUnit(int $healthUnitId): Response
     {
-        $requestData['healthUnityId'] = $healthUnityId;
+        $requestData['healthUnitId'] = $healthUnitId;
         $validator = Validator::make(
             $requestData,
             [
-                'healthUnityId' => ['required', 'exists:health_unities,id']
+                'healthUnitId' => ['required', 'exists:health_units,id']
             ]
         );
         if ($validator->fails()) {
             $errors = $validator->errors();
             return new Response(['errors' => $errors->all()], 400);
         }
-        $healthUnityService = new HealthUnityService();
-        $deleteResult = $healthUnityService->deleteHealthUnity($healthUnityId);
+        $healthUnitService = new HealthUnitService();
+        $deleteResult = $healthUnitService->deleteHealthUnit($healthUnitId);
         if ($deleteResult) {
-            return new Response(['message' => 'Health unity deleted successfully!'], 200);
+            return new Response(['message' => 'Health unit deleted successfully!'], 200);
         }
-        return new Response(['errors' => 'Error! Failed to delete the Health Unity.'], 500);
+        return new Response(['errors' => 'Error! Failed to delete the Health Unit.'], 500);
     }
 }

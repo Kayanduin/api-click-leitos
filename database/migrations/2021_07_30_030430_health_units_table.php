@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class SamuUnitiesTable extends Migration
+class HealthUnitsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class SamuUnitiesTable extends Migration
      */
     public function up()
     {
-        Schema::create('samu_unities', function (Blueprint $table) {
+        Schema::create('health_units', function (Blueprint $table) {
             $table->id();
             $table->string('name')->nullable(false);
             $table->bigInteger('address_id', false, true)->nullable(false);
@@ -29,6 +29,6 @@ class SamuUnitiesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('samu_unities');
+        Schema::dropIfExists('health_units');
     }
 }

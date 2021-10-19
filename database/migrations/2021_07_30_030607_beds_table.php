@@ -18,7 +18,7 @@ class BedsTable extends Migration
             $table->bigInteger('bed_type_id', false, true)->nullable(false);
             $table->bigInteger('total_beds', false, true)->nullable(false);
             $table->bigInteger('free_beds', false, true)->nullable(false);
-            $table->bigInteger('health_unity_id', false, true)->nullable(false);
+            $table->bigInteger('health_unit_id', false, true)->nullable(false);
             $table->bigInteger('created_by', false, true)->nullable(false);
             $table->timestamps();
         });

@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class HealthUnitiesContacts extends Migration
+class HealthUnitContacts extends Migration
 {
     /**
      * Run the migrations.
@@ -13,9 +13,9 @@ class HealthUnitiesContacts extends Migration
      */
     public function up()
     {
-        Schema::create('health_unity_contacts', function (Blueprint $table) {
+        Schema::create('health_unit_contacts', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger('health_unity_id', false, true)->nullable(false);
+            $table->bigInteger('health_unit_id', false, true)->nullable(false);
             $table->string('telephone_number')->nullable(false);
             $table->bigInteger('created_by', false, true)->nullable(false);
             $table->timestamps();
@@ -29,6 +29,6 @@ class HealthUnitiesContacts extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('health_unities_contacts');
+        Schema::dropIfExists('health_unit_contacts');
     }
 }

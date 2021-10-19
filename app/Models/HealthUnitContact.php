@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * @mixin Builder
  */
-class HealthUnity extends Model
+class HealthUnitContact extends Model
 {
     use HasFactory;
 
@@ -19,8 +19,8 @@ class HealthUnity extends Model
      * @var array
      */
     protected $fillable = [
-        'name',
-        'address_id',
+        'health_unit_id',
+        'telephone_number',
         'created_by'
     ];
 }

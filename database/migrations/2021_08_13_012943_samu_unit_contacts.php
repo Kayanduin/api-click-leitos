@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class SamuUnitiesContacts extends Migration
+class SamuUnitContacts extends Migration
 {
     /**
      * Run the migrations.
@@ -13,9 +13,9 @@ class SamuUnitiesContacts extends Migration
      */
     public function up()
     {
-        Schema::create('samu_unity_contacts', function (Blueprint $table) {
+        Schema::create('samu_unit_contacts', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger('samu_unity_id', false, true)->nullable(false);
+            $table->bigInteger('samu_unit_id', false, true)->nullable(false);
             $table->string('telephone_number')->nullable(false);
             $table->bigInteger('created_by', false, true)->nullable(false);
             $table->timestamps();
@@ -29,6 +29,6 @@ class SamuUnitiesContacts extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('samu_unities_contacts');
+        Schema::dropIfExists('samu_unit_contacts');
     }
 }

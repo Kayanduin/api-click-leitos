@@ -22,20 +22,20 @@ class ForeignKeysUpdate extends Migration
             $table->foreign('user_id')->references('id')->on('users');
         });
 
-        Schema::table('samu_unity_contacts', function (Blueprint $table) {
-            $table->foreign('samu_unity_id')->references('id')->on('samu_unities');
+        Schema::table('samu_unit_contacts', function (Blueprint $table) {
+            $table->foreign('samu_unit_id')->references('id')->on('samu_units');
         });
 
-        Schema::table('health_unity_contacts', function (Blueprint $table) {
-            $table->foreign('health_unity_id')->references('id')->on('health_unities');
+        Schema::table('health_unit_contacts', function (Blueprint $table) {
+            $table->foreign('health_unit_id')->references('id')->on('health_units');
         });
 
-        Schema::table('samu_unities', function (Blueprint $table) {
+        Schema::table('samu_units', function (Blueprint $table) {
             $table->foreign('address_id')->references('id')->on('addresses');
             $table->foreign('created_by')->references('id')->on('users');
         });
 
-        Schema::table('health_unities', function (Blueprint $table) {
+        Schema::table('health_units', function (Blueprint $table) {
             $table->foreign('address_id')->references('id')->on('addresses');
             $table->foreign('created_by')->references('id')->on('users');
         });
@@ -50,7 +50,7 @@ class ForeignKeysUpdate extends Migration
 
         Schema::table('beds', function (Blueprint $table) {
             $table->foreign('bed_type_id')->references('id')->on('bed_types');
-            $table->foreign('health_unity_id')->references('id')->on('health_unities');
+            $table->foreign('health_unit_id')->references('id')->on('health_units');
             $table->foreign('created_by')->references('id')->on('users');
         });
 
@@ -59,10 +59,10 @@ class ForeignKeysUpdate extends Migration
             $table->foreign('created_by')->references('id')->on('users');
         });
 
-        Schema::table('users_unities', function (Blueprint $table) {
+        Schema::table('users_units', function (Blueprint $table) {
             $table->foreign('user_id')->references('id')->on('users');
-            $table->foreign('samu_unity_id')->references('id')->on('samu_unities');
-            $table->foreign('health_unity_id')->references('id')->on('health_unities');
+            $table->foreign('samu_unit_id')->references('id')->on('samu_units');
+            $table->foreign('health_unit_id')->references('id')->on('health_units');
             $table->foreign('created_by')->references('id')->on('users');
         });
     }

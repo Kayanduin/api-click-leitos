@@ -1,7 +1,7 @@
 <?php
 
 use App\Http\Controllers\AddressController;
-use App\Http\Controllers\HealthUnityController;
+use App\Http\Controllers\HealthUnitController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -32,11 +32,11 @@ Route::delete('/users/{id}', [UserController::class, 'deleteUser'])
 Route::get('states', [AddressController::class, 'getStates']);
 Route::get('state-cities/{id}', [AddressController::class, 'getCitiesByState'])
     ->where('id', '[0-9]+');
-Route::post('/health-unity', [HealthUnityController::class, 'createHealthUnity']);
-Route::put('/health-unity/{id}', [HealthUnityController::class, 'updateHealthUnity'])
+Route::post('/health-units', [HealthUnitController::class, 'createHealthUnit']);
+Route::put('/health-units/{id}', [HealthUnitController::class, 'updateHealthUnit'])
     ->where('id', '[0-9]+');
-Route::get('/health-unity/{id}', [HealthUnityController::class, 'getHealthUnity'])
+Route::get('/health-units/{id}', [HealthUnitController::class, 'getHealthUnit'])
     ->where('id', '[0-9]+');
-Route::get('/health-unity', [HealthUnityController::class, 'getAllHealthUnities']);
-Route::delete('/health-unity/{id}', [HealthUnityController::class, 'deleteHealthUnity'])
+Route::get('/health-units', [HealthUnitController::class, 'getAllHealthUnits']);
+Route::delete('/health-units/{id}', [HealthUnitController::class, 'deleteHealthUnit'])
     ->where('id', '[0-9]+');

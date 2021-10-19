@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class UsersUnitiesTable extends Migration
+class SamuUnitsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,14 +13,12 @@ class UsersUnitiesTable extends Migration
      */
     public function up()
     {
-        Schema::create('users_unities', function (Blueprint $table) {
-            $table->bigInteger('user_id', false, true);
-            $table->bigInteger('samu_unity_id', false, true)->nullable(false);
-            $table->bigInteger('health_unity_id', false, true)->nullable(false);
+        Schema::create('samu_units', function (Blueprint $table) {
+            $table->id();
+            $table->string('name')->nullable(false);
+            $table->bigInteger('address_id', false, true)->nullable(false);
             $table->bigInteger('created_by', false, true)->nullable(false);
             $table->timestamps();
-
-            $table->primary('user_id');
         });
     }
 
@@ -31,6 +29,6 @@ class UsersUnitiesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('users_unities');
+        Schema::dropIfExists('samu_units');
     }
 }
