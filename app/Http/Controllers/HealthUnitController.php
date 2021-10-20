@@ -64,7 +64,7 @@ class HealthUnitController extends Controller
                 'district' => ['sometimes', 'required'],
                 'city_id' => ['sometimes', 'required', 'integer', 'exists:cities,id'],
                 'telephone_numbers' => ['sometimes', 'required'],
-                'telephone_numbers.*.id' => ['required', 'exists:health_units_contacts,id'],
+                'telephone_numbers.*.id' => ['required', 'exists:health_unit_contacts,id'],
                 'telephone_numbers.*.telephone_number' => ['required', 'celular_com_ddd']
             ],
             [
