@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AddressController;
+use App\Http\Controllers\BedController;
 use App\Http\Controllers\HealthUnitController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
@@ -40,3 +41,17 @@ Route::get('/health-units/{id}', [HealthUnitController::class, 'getHealthUnit'])
 Route::get('/health-units', [HealthUnitController::class, 'getAllHealthUnits']);
 Route::delete('/health-units/{id}', [HealthUnitController::class, 'deleteHealthUnit'])
     ->where('id', '[0-9]+');
+Route::get('/beds/{id}', [BedController::class, 'getBedById'])
+    ->where('id', '[0-9]+');
+Route::get('health-unit-beds/{id}', [BedController::class, 'getBedsByHealthUnit'])
+    ->where('id', '[0-9]+');
+Route::post('/beds', [BedController::class, 'createBed']);
+Route::put('/beds/{id}', [BedController::class, 'updateBed'])
+    ->where('id', '[0-9]+');
+Route::delete('/beds/{id}', [BedController::class, 'deleteBed'])
+    ->where('id', '[0-9]+');
+Route::post('/increase-free-beds/{id}', [BedController::class, 'increaseFreeBeds'])
+    ->where('id', '[0-9]+');
+Route::post('/decrease-free-beds/{id}', [BedController::class, 'decreaseFreeBeds'])
+    ->where('id', '[0-9]+');
+Route::get('/bed-types', [BedController::class, 'getBedTypes']);

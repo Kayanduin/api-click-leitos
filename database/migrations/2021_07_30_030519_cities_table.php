@@ -17,7 +17,6 @@ class CitiesTable extends Migration
             $table->id();
             $table->string('name')->nullable(false);
             $table->bigInteger('state_id', false, true)->nullable(false);
-            $table->timestamps();
         });
     }
 

@@ -16,8 +16,6 @@ class BedTypesTable extends Migration
         Schema::create('bed_types', function (Blueprint $table) {
             $table->id();
             $table->string('name')->nullable(false);
-            $table->bigInteger('created_by', false, true)->nullable(false);
-            $table->timestamps();
         });
     }
 

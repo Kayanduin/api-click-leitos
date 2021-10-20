@@ -17,7 +17,6 @@ class StatesTable extends Migration
             $table->id();
             $table->string('name')->nullable(false);
             $table->string('initials')->nullable(false);
-            $table->timestamps();
         });
     }
 
