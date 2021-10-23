@@ -51,8 +51,8 @@ class BedService
         foreach ($beds as $key => $bed) {
             $resultArray[$key]['bed'] = $bed->toArray();
             $resultArray[$key]['bed_type'] = (new BedType())->find($bed->getAttribute('bed_type_id'));
+            $resultArray[$key]['health_unit'] = (new HealthUnit())->find($healthUnitId);
         }
-        $resultArray['health_unit'] = (new HealthUnit())->find($healthUnitId);
         return $resultArray;
     }
 
