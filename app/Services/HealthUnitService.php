@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Models\Address;
+use App\Models\Bed;
+use App\Models\BedType;
 use App\Models\City;
 use App\Models\HealthUnit;
 use App\Models\HealthUnitContact;
@@ -127,5 +129,32 @@ class HealthUnitService
         $healthUnitAddress = (new Address())->find($healthUnit->getAttribute('address_id'));
 
         return $healthUnitAddress->delete();
+    }
+
+    /**
+     * @return array
+     */
+    public function getAllHealthUnitsWithBeds(): array
+    {
+        $resultArray = [];
+        $keysToUnset = [];
+        $healthUnits = (new HealthUnit())->get();
+        foreach ($healthUnits as $arrayKey => $healthUnit) {
+            $resultArray[$arrayKey]['health_unit'] = $healthUnit->toArray();
+            $beds = (new Bed())->where('health_unit_id', $healthUnit->getAttribute('id'))->get();
+            if (empty($beds->toArray())) {
+                $keysToUnset[] = $arrayKey;
+            }
+            foreach ($beds as $key => $bed) {
+                $bedType = (new BedType())->find($bed->getAttribute('bed_type_id'));
+                $bedArray[$key]['bed'] = $bed->toArray();
+                $bedArray[$key]['bed_type'] = $bedType->toArray();
+                $resultArray[$arrayKey]['health_unit']['beds'] = $bedArray;
+            }
+        }
+        foreach ($keysToUnset as $key) {
+            array_splice($resultArray, $key, 1);
+        }
+        return $resultArray;
     }
 }

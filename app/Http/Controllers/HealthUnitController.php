@@ -148,4 +148,12 @@ class HealthUnitController extends Controller
         }
         return new Response(['errors' => 'Error! Failed to delete the Health Unit.'], 500);
     }
+
+    public function getAllHealthUnitsWithBeds(): Response
+    {
+        $healthUnitService = new HealthUnitService();
+        $healthUnits = $healthUnitService->getAllHealthUnitsWithBeds();
+
+        return new Response($healthUnits, 200);
+    }
 }
