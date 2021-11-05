@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Bed;
 use App\Models\BedType;
 use App\Models\HealthUnit;
+use App\Models\User;
 
 class BedService
 {
@@ -14,12 +15,15 @@ class BedService
      */
     public function createBed(array $data): bool
     {
+        /** @var User $user */
+        $user = auth()->user();
+
         $bed = new Bed([
             'bed_type_id' => $data['bed_type_id'],
             'total_beds' => $data['total_beds'],
             'free_beds' => $data['total_beds'],
             'health_unit_id' => $data['health_unit_id'],
-            'created_by' => 1
+            'created_by' => $user->id
         ]);
         return $bed->save();
     }

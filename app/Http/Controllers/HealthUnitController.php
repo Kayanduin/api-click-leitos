@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\HealthUnit;
 use App\Models\HealthUnitContact;
 use App\Services\HealthUnitService;
 use Illuminate\Http\Request;
@@ -13,6 +14,10 @@ class HealthUnitController extends Controller
 {
     public function createHealthUnit(Request $request): Response
     {
+        if ($request->user()->cannot('create', HealthUnit::class)) {
+            return new Response(['errors' => 'User not allowed.'], 403);
+        }
+
         $requestData = $request->all();
 
         $validator = Validator::make(
@@ -38,7 +43,7 @@ class HealthUnitController extends Controller
         }
         try {
             $validatedData = $validator->validated();
-        } catch (ValidationException $exception) {
+        } catch (ValidationException  $exception) {
             return new Response(['errors' => $exception->getMessage()], 500);
         }
         $healthUnitService = new HealthUnitService();
@@ -52,6 +57,10 @@ class HealthUnitController extends Controller
 
     public function updateHealthUnit(Request $request, $healthUnitId): Response
     {
+        if ($request->user()->cannot('update', HealthUnit::class)) {
+            return new Response(['errors' => 'User not allowed.'], 403);
+        }
+
         $requestData = $request->all();
         $requestData['healthUnitId'] = $healthUnitId;
         $validator = Validator::make(

@@ -18,11 +18,21 @@ class UserService
         $token = 'QyQ_%$ypZeLs54b4Vsz536&Ykc6Wp=vsLA#Z7=6dNwt*!VRXeVua#bm8R^zQV7hBLC8v&FrrEmF8xw8SLD&KRw%7+6$%%j95ExCk';
         $firstPassword = Hash::make($token);
         $sanitizedFirstPassword = preg_replace('/^\$2y\$10\$/', '', $firstPassword);
+        $createdById = 1;
+        if ((new User())->exists()) {
+            /** @var User $user */
+            $user = auth()->user();
+            $createdById = $user->id;
+        }
+
         $user = new User([
             'name' => $newUserData['name'],
             'email' => $newUserData['email'],
             'password' => Hash::make($sanitizedFirstPassword, ['rounds' => 15]),
-            'cpf' => $newUserData['cpf']
+            'cpf' => $newUserData['cpf'],
+            'first_time_login' => 1,
+            'role_id' => 1,
+            'created_by' => $createdById
         ]);
         $saveResult = $user->save();
         if ($saveResult === false) {
@@ -33,7 +43,7 @@ class UserService
             $contact = new UserContact([
                 'user_id' => $userId,
                 'telephone_number' => $telephoneNumber,
-                'created_by' => 1, //INCLUIR ID DO USUÁRIO
+                'created_by' => $createdById
             ]);
             $saveResult = $contact->save();
             if ($saveResult === false) {
@@ -41,6 +51,8 @@ class UserService
                 return false;
             }
         }
+        $mailService = new MailService();
+        $mailService->sendFirstPasswordMail($sanitizedFirstPassword, $user->email);
         return true;
     }
 
@@ -97,10 +109,6 @@ class UserService
                 case 'email':
                     $user->email = $value;
                     break;
-                case 'password':
-                    $hashedPassword = Hash::make($value, ['rounds' => 15]);
-                    $user->password = $hashedPassword;
-                    break;
                 case 'cpf':
                     $user->cpf = $value;
                     break;
@@ -137,5 +145,24 @@ class UserService
             }
         }
         return $user->delete();
+    }
+
+    /**
+     * @param array $data
+     * @return bool
+     */
+    public function resetPassword(array $data): bool
+    {
+        /** @var User $user */
+        $user = auth()->user();
+        $user->password = Hash::make($data['new_password'], ['rounds' => 15]);
+        $user->first_time_login = 0;
+        $isUserSaved = $user->save();
+        if ($isUserSaved) {
+            $mailService = new MailService();
+            $mailService->sendResetPasswordMail($user->email);
+            return true;
+        }
+        return false;
     }
 }

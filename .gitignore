@@ -13,3 +13,5 @@ yarn-error.log
 /.idea
 /.vscode
 /PHP_CodeSniffer
+.env.example
+.env

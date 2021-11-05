@@ -19,6 +19,9 @@ class CreateUserTable extends Migration
             $table->string('email')->nullable(false);
             $table->string('password')->nullable(false);
             $table->string('cpf')->unique()->nullable(false);
+            $table->boolean('first_time_login')->nullable(false);
+            $table->bigInteger('role_id', false, true)->nullable(false);
+            $table->bigInteger('created_by', false, true)->nullable(false);
             $table->timestamps();
         });
     }

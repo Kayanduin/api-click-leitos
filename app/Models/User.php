@@ -4,13 +4,15 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 
 /**
  * @mixin Builder
  */
-class User extends Model
+class User extends Authenticatable
 {
+    use HasApiTokens;
     use HasFactory;
 
     /**
@@ -22,7 +24,10 @@ class User extends Model
         'name',
         'email',
         'password',
-        'cpf'
+        'cpf',
+        'first_time_login',
+        'role_id',
+        'created_by'
     ];
 
     /**
@@ -32,6 +37,7 @@ class User extends Model
      */
     protected $hidden = [
         'password',
+        'first_time_login'
     ];
 
     /**
@@ -45,11 +51,13 @@ class User extends Model
         'email',
         'password',
         'cpf',
+        'first_time_login',
+        'created_by',
         'created_at',
         'updated_at'
     ];
 
-    public function user()
+    public function contacts()
     {
         return $this->hasMany(UserContact::class);
     }

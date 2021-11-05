@@ -9,6 +9,7 @@ use App\Models\City;
 use App\Models\HealthUnit;
 use App\Models\HealthUnitContact;
 use App\Models\State;
+use App\Models\User;
 
 class HealthUnitService
 {
@@ -20,10 +21,12 @@ class HealthUnitService
             return false;
         }
         $address = $addressService->getAddress($data);
+        /** @var User $user */
+        $user = auth()->user();
         $healthUnit = new HealthUnit([
             'name' => $data['name'],
             'address_id' => $address->id,
-            'created_by' => 1
+            'created_by' => $user->id
         ]);
         $result = $healthUnit->save();
         if (!$result) {
@@ -34,7 +37,7 @@ class HealthUnitService
             $healthUnitContact = new HealthUnitContact([
                 'health_unit_id' => $healthUnit->id,
                 'telephone_number' => $telephoneNumber,
-                'created_by' => 1
+                'created_by' => $user->id
             ]);
             if (!$healthUnitContact->save()) {
                 return false;

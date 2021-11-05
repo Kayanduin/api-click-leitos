@@ -13,10 +13,6 @@ class ForeignKeysUpdate extends Migration
      */
     public function up()
     {
-        Schema::table('permissions', function (Blueprint $table) {
-            $table->foreign('user_id')->references('id')->on('users');
-            $table->foreign('created_by')->references('id')->on('users');
-        });
 
         Schema::table('user_contacts', function (Blueprint $table) {
             $table->foreign('user_id')->references('id')->on('users');
@@ -60,6 +56,10 @@ class ForeignKeysUpdate extends Migration
             $table->foreign('samu_unit_id')->references('id')->on('samu_units');
             $table->foreign('health_unit_id')->references('id')->on('health_units');
             $table->foreign('created_by')->references('id')->on('users');
+        });
+
+        Schema::table('users', function (Blueprint $table) {
+            $table->foreign('role_id')->references('id')->on('roles');
         });
     }
 
