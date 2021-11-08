@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Address;
 use App\Models\City;
 use App\Models\State;
+use App\Models\User;
 
 class AddressService
 {
@@ -40,12 +41,14 @@ class AddressService
 
     public function createAddress(array $data): bool
     {
+        /** @var User $user */
+        $user = auth()->user();
         $address = new Address([
             'address' => $data['address'],
             'address_number' => $data['address_number'],
             'district' => $data['district'],
             'city_id' => $data['city_id'],
-            'created_by' => 1
+            'created_by' => $user->id
         ]);
         return $address->save();
     }

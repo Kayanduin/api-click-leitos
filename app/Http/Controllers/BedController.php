@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Bed;
 use App\Services\BedService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -11,10 +12,11 @@ use Illuminate\Validation\ValidationException;
 class BedController extends Controller
 {
     /**
+     * @param Request $request
      * @param int $bedId
      * @return Response
      */
-    public function getBedById(int $bedId): Response
+    public function getBedById(Request $request, int $bedId): Response
     {
         $validator = Validator::make(
             ['bed_id' => $bedId],
@@ -24,6 +26,10 @@ class BedController extends Controller
             $errors = $validator->errors();
             return new Response(['errors' => $errors->all()], 400);
         }
+        $bed = (new Bed())->find($bedId);
+        if ($request->user()->cannot('viewById', [Bed::class, $bed])) {
+            return new Response(['errors' => 'Access denied.'], 403);
+        }
         $bedService = new BedService();
         $bed = $bedService->getBedById($bedId);
 
@@ -31,11 +37,16 @@ class BedController extends Controller
     }
 
     /**
+     * @param Request $request
      * @param int $healthUnitId
      * @return Response
      */
-    public function getBedsByHealthUnit(int $healthUnitId): Response
+    public function getBedsByHealthUnit(Request $request, int $healthUnitId): Response
     {
+        if ($request->user()->cannot('viewAny', Bed::class)) {
+            return new Response(['errors' => 'Access denied.'], 403);
+        }
+
         $validator = Validator::make(
             ['health_unit_id' => $healthUnitId],
             [
@@ -84,6 +95,16 @@ class BedController extends Controller
         } catch (ValidationException $exception) {
             return new Response(['errors' => $exception->getMessage()], 500);
         }
+
+        if (
+            $request->user()->cannot(
+                'create',
+                [Bed::class, $validatedData['health_unit_id']]
+            )
+        ) {
+            return new Response(['errors' => 'Access denied.'], 403);
+        }
+
         $bedService = new BedService();
         $isBedCreated = $bedService->createBed($validatedData);
 
@@ -100,10 +121,10 @@ class BedController extends Controller
      */
     public function updateBed(Request $request, int $bedId): Response
     {
-        $request = $request->toArray();
-        $request['bed_id'] = $bedId;
+        $requestArray = $request->toArray();
+        $requestArray['bed_id'] = $bedId;
         $validator = Validator::make(
-            $request,
+            $requestArray,
             [
                 'total_beds' => ['required', 'integer', 'gt:0'],
                 'bed_id' => ['required', 'integer', 'exists:beds,id', 'gt:0']
@@ -118,6 +139,17 @@ class BedController extends Controller
         } catch (ValidationException $exception) {
             return new Response(['errors' => $exception->getMessage()], 500);
         }
+
+        $bed = (new Bed())->find($bedId);
+        if (
+            $request->user()->cannot(
+                'update',
+                [Bed::class, $bed]
+            )
+        ) {
+            return new Response(['errors' => 'Access denied.'], 403);
+        }
+
         $bedService = new BedService();
         $isBedUpdated = $bedService->updateBed($validatedData);
 
@@ -128,10 +160,11 @@ class BedController extends Controller
     }
 
     /**
+     * @param Request $request
      * @param int $bedId
      * @return Response
      */
-    public function deleteBed(int $bedId): Response
+    public function deleteBed(Request $request, int $bedId): Response
     {
         $validator = Validator::make(
             ['bed_id' => $bedId],
@@ -141,6 +174,17 @@ class BedController extends Controller
             $errors = $validator->errors();
             return new Response(['errors' => $errors->all()], 400);
         }
+
+        $bed = (new Bed())->find($bedId);
+        if (
+            $request->user()->cannot(
+                'delete',
+                [Bed::class, $bed]
+            )
+        ) {
+            return new Response(['errors' => 'Access denied.'], 403);
+        }
+
         $bedService = new BedService();
         $isBedDeleted = $bedService->deleteBed($bedId);
         if ($isBedDeleted) {
@@ -156,10 +200,10 @@ class BedController extends Controller
      */
     public function increaseFreeBeds(Request $request, int $bedId): Response
     {
-        $request = $request->toArray();
-        $request['bed_id'] = $bedId;
+        $requestArray = $request->toArray();
+        $requestArray['bed_id'] = $bedId;
         $validator = Validator::make(
-            $request,
+            $requestArray,
             [
                 'freed_beds_number' => ['required', 'integer', 'gt:0'],
                 'bed_id' => ['required', 'integer', 'exists:beds,id', 'gt:0']
@@ -174,6 +218,17 @@ class BedController extends Controller
         } catch (ValidationException $exception) {
             return new Response(['errors' => $exception->getMessage()], 500);
         }
+
+        $bed = (new Bed())->find($bedId);
+        if (
+            $request->user()->cannot(
+                'canAlterFreeBedNumber',
+                [Bed::class, $bed]
+            )
+        ) {
+            return new Response(['errors' => 'Access denied.'], 403);
+        }
+
         $bedService = new BedService();
         $isBedUpdated = $bedService->increaseFreeBeds($validatedData);
         if ($isBedUpdated) {
@@ -189,10 +244,10 @@ class BedController extends Controller
      */
     public function decreaseFreeBeds(Request $request, int $bedId): Response
     {
-        $request = $request->toArray();
-        $request['bed_id'] = $bedId;
+        $requestArray = $request->toArray();
+        $requestArray['bed_id'] = $bedId;
         $validator = Validator::make(
-            $request,
+            $requestArray,
             [
                 'occupied_beds_number' => ['required', 'integer', 'gt:0'],
                 'bed_id' => ['required', 'integer', 'exists:beds,id', 'gt:0']
@@ -207,6 +262,17 @@ class BedController extends Controller
         } catch (ValidationException $exception) {
             return new Response(['errors' => $exception->getMessage()], 500);
         }
+
+        $bed = (new Bed())->find($bedId);
+        if (
+            $request->user()->cannot(
+                'canAlterFreeBedNumber',
+                [Bed::class, $bed]
+            )
+        ) {
+            return new Response(['errors' => 'Access denied.'], 403);
+        }
+
         $bedService = new BedService();
         $isBedUpdated = $bedService->decreaseFreeBeds($validatedData);
         if ($isBedUpdated) {
@@ -216,10 +282,15 @@ class BedController extends Controller
     }
 
     /**
+     * @param Request $request
      * @return Response
      */
-    public function getBedTypes(): Response
+    public function getBedTypes(Request $request): Response
     {
+        if ($request->user()->cannot('viewBedType', Bed::class)) {
+            return new Response(['errors' => 'Access denied.'], 403);
+        }
+
         $bedService = new BedService();
         $bedTypes = $bedService->getBedTypes();
         return new Response($bedTypes, 200);

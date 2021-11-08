@@ -15,7 +15,7 @@ class HealthUnitController extends Controller
     public function createHealthUnit(Request $request): Response
     {
         if ($request->user()->cannot('create', HealthUnit::class)) {
-            return new Response(['errors' => 'User not allowed.'], 403);
+            return new Response(['errors' => 'Access denied.'], 403);
         }
 
         $requestData = $request->all();
@@ -57,10 +57,6 @@ class HealthUnitController extends Controller
 
     public function updateHealthUnit(Request $request, $healthUnitId): Response
     {
-        if ($request->user()->cannot('update', HealthUnit::class)) {
-            return new Response(['errors' => 'User not allowed.'], 403);
-        }
-
         $requestData = $request->all();
         $requestData['healthUnitId'] = $healthUnitId;
         $validator = Validator::make(
@@ -99,6 +95,11 @@ class HealthUnitController extends Controller
         } catch (ValidationException $exception) {
             return new Response(['errors' => $exception->getMessage()], 500);
         }
+
+        if ($request->user()->cannot('update', [HealthUnit::class, $healthUnitId])) {
+            return new Response(['errors' => 'Access denied.'], 403);
+        }
+
         $healthUnitService = new HealthUnitService();
         $isHealthUnitUpdated = $healthUnitService->updateHealthUnit($validatedData);
 
@@ -108,7 +109,7 @@ class HealthUnitController extends Controller
         return new Response(['message' => 'Health unit updated successfully!'], 200);
     }
 
-    public function getHealthUnit(int $healthUnitId): Response
+    public function getHealthUnit(Request $request, int $healthUnitId): Response
     {
         $requestData['healthUnitId'] = $healthUnitId;
         $validator = Validator::make(
@@ -121,14 +122,23 @@ class HealthUnitController extends Controller
             $errors = $validator->errors();
             return new Response(['errors' => $errors->all()], 400);
         }
+
+        if ($request->user()->cannot('view', [HealthUnit::class, $healthUnitId])) {
+            return new Response(['errors' => 'Access denied.'], 403);
+        }
+
         $healthUnitService = new HealthUnitService();
         $healthUnit = $healthUnitService->getHealthUnit($healthUnitId);
 
         return new Response($healthUnit, 200);
     }
 
-    public function getAllHealthUnits(): Response
+    public function getAllHealthUnits(Request $request): Response
     {
+        if ($request->user()->cannot('viewAny', HealthUnit::class)) {
+            return new Response(['errors' => 'Access denied.'], 403);
+        }
+
         $healthUnitService = new HealthUnitService();
         $healthUnits = $healthUnitService->getAllHealthUnits();
         if (is_array($healthUnits)) {
@@ -137,8 +147,12 @@ class HealthUnitController extends Controller
         return new Response(['message' => 'There is no health unit registered.'], 200);
     }
 
-    public function deleteHealthUnit(int $healthUnitId): Response
+    public function deleteHealthUnit(Request $request, int $healthUnitId): Response
     {
+        if ($request->user()->cannot('delete', HealthUnit::class)) {
+            return new Response(['errors' => 'Access denied.'], 403);
+        }
+
         $requestData['healthUnitId'] = $healthUnitId;
         $validator = Validator::make(
             $requestData,
@@ -158,8 +172,11 @@ class HealthUnitController extends Controller
         return new Response(['errors' => 'Error! Failed to delete the Health Unit.'], 500);
     }
 
-    public function getAllHealthUnitsWithBeds(): Response
+    public function getAllHealthUnitsWithBeds(Request $request): Response
     {
+        if ($request->user()->cannot('viewAny', HealthUnit::class)) {
+            return new Response(['errors' => 'Access denied.'], 403);
+        }
         $healthUnitService = new HealthUnitService();
         $healthUnits = $healthUnitService->getAllHealthUnitsWithBeds();
 

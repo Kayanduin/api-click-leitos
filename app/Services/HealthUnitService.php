@@ -10,6 +10,7 @@ use App\Models\HealthUnit;
 use App\Models\HealthUnitContact;
 use App\Models\State;
 use App\Models\User;
+use App\Models\UserUnit;
 
 class HealthUnitService
 {
@@ -42,6 +43,16 @@ class HealthUnitService
             if (!$healthUnitContact->save()) {
                 return false;
             }
+        }
+        $userUnit = new UserUnit([
+            'user_id' => $user->id,
+            'samu_unit_id' => 0,
+            'health_unit_id' => $healthUnit->id,
+            'created_by' => $user->id
+        ]);
+        $saveResult = $userUnit->save();
+        if (!$saveResult) {
+            return false;
         }
         return true;
     }

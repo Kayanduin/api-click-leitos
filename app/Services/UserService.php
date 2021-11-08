@@ -2,8 +2,10 @@
 
 namespace App\Services;
 
+use App\Models\Role;
 use App\Models\User;
 use App\Models\UserContact;
+use App\Models\UserUnit;
 use Illuminate\Support\Facades\Hash;
 
 class UserService
@@ -51,6 +53,43 @@ class UserService
                 return false;
             }
         }
+
+        if (array_key_exists('health_unit_id', $newUserData)) {
+            $userUnit = new UserUnit([
+                'user_id' => $userId,
+                'samu_unit_id' => 0,
+                'health_unit_id' => $newUserData['health_unit_id'],
+                'created_by' => $createdById
+            ]);
+            $saveResult = $userUnit->save();
+            if ($saveResult === false) {
+                /** @var UserContact $contact */
+                foreach ($user->contacts() as $contact) {
+                    $contact->delete();
+                }
+                $user->delete();
+                return false;
+            }
+        }
+
+        if (array_key_exists('samu_unit_id', $newUserData)) {
+            $userUnit = new UserUnit([
+                'user_id' => $userId,
+                'samu_unit_id' => $newUserData['samu_unit_id'],
+                'health_unit_id' => 0,
+                'created_by' => $createdById
+            ]);
+            $saveResult = $userUnit->save();
+            if ($saveResult === false) {
+                /** @var UserContact $contact */
+                foreach ($user->contacts() as $contact) {
+                    $contact->delete();
+                }
+                $user->delete();
+                return false;
+            }
+        }
+
         $mailService = new MailService();
         $mailService->sendFirstPasswordMail($sanitizedFirstPassword, $user->email);
         return true;
@@ -164,5 +203,13 @@ class UserService
             return true;
         }
         return false;
+    }
+
+    /**
+     * @return array
+     */
+    public function getRoles(): array
+    {
+        return (new Role())->get()->toArray();
     }
 }

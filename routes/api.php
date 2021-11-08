@@ -4,6 +4,7 @@ use App\Http\Controllers\AddressController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BedController;
 use App\Http\Controllers\HealthUnitController;
+use App\Http\Controllers\SamuController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -58,4 +59,12 @@ Route::middleware(['auth:sanctum', 'firstLogin'])->group(function () {
     Route::post('/decrease-free-beds/{id}', [BedController::class, 'decreaseFreeBeds'])
         ->where('id', '[0-9]+');
     Route::get('/bed-types', [BedController::class, 'getBedTypes']);
+    Route::get('/user-roles', [UserController::class, 'getUserRoles']);
+    Route::post('/samu-unit', [SamuController::class, 'create']);
+    Route::get('/samu-unit/{id}', [SamuController::class, 'view'])
+        ->where('id', '[0-9]+');
+    Route::put('/samu-unit/{id}', [SamuController::class, 'update'])
+        ->where('id', '[0-9]+');
+    Route::delete('/samu-unit/{id}', [SamuController::class, 'delete'])
+        ->where('id', '[0-9]+');
 });

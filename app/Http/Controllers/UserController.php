@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use App\Models\UserContact;
 use App\Services\UserService;
 use Illuminate\Http\Request;
@@ -25,7 +26,10 @@ class UserController extends Controller
                 'email' => ['required', 'email:rfc,dns'],
                 'cpf' => ['required', 'formato_cpf', 'cpf', 'unique:users,cpf'],
                 'telephone_numbers' => ['required'],
-                'telephone_numbers.*' => ['required', 'celular_com_ddd']
+                'telephone_numbers.*' => ['required', 'celular_com_ddd'],
+                'user_role_id' => ['required', 'integer', 'exists:roles,id', 'gt:0'],
+                'health_unit_id' => ['sometimes', 'required', 'exists:health_units,id', 'gt:0'],
+                'samu_unit_id' => ['sometimes', 'required', 'exists:samu_units,id', 'gt:0']
             ],
             [
                 'formato_cpf' => 'The field :attribute does not contain a valid CPF format.',
@@ -34,10 +38,18 @@ class UserController extends Controller
                     ' following format: (00) 00000-0000 or (00) 0000-0000'
             ]
         );
-
         if ($validator->fails()) {
             $errors = $validator->errors();
             return new Response(['errors' => $errors->all()], 400);
+        }
+
+        if (
+            $request->user()->cannot(
+                'create',
+                [User::class, $requestData['user_role_id']]
+            )
+        ) {
+            return new Response(['errors' => 'Access denied.'], 403);
         }
 
         $userService = new UserService();
@@ -51,10 +63,41 @@ class UserController extends Controller
 
     /**
      * Returns an associative array with all the users stored in the database.
+     * @param Request $request
      * @return Response
      */
-    public function getAllUsers(): Response
+    public function getAllUsers(Request $request): Response
     {
+        $requestData = $request->all();
+        $validator = Validator::make(
+            $requestData,
+            [
+                'health_unit_id' => ['required_without:samu_unit_id', 'integer', 'exists:health_units,id', 'gt:0'],
+                'samu_unit_id' => ['required_without:health_unit_id', 'integer', 'exists:samu_units,id', 'gt:0'],
+            ]
+        );
+        if ($validator->fails()) {
+            $errors = $validator->errors();
+            return new Response(['errors' => $errors->all()], 400);
+        }
+        $healthUnitId = null;
+        $samuUnitId = null;
+        if (array_key_exists('samu_unit_id', $requestData)) {
+            $samuUnitId = $requestData['samu_unit_id'];
+        }
+        if (array_key_exists('health_unit_id', $requestData)) {
+            $healthUnitId = $requestData['health_unit_id'];
+        }
+
+        if (
+            $request->user()->cannot(
+                'viewAnyByUnit',
+                [User::class, $healthUnitId, $samuUnitId]
+            )
+        ) {
+            return new Response(['errors' => 'Access denied.'], 403);
+        }
+
         $userService = new UserService();
         $usersArray = $userService->getAllUsers();
         if (is_array($usersArray)) {
@@ -65,10 +108,11 @@ class UserController extends Controller
 
     /**
      * Returns an associative array with the user stored in the database that matches the user ID.
+     * @param Request $request
      * @param $id
      * @return Response
      */
-    public function getUser($id): Response
+    public function getUser(Request $request, $id): Response
     {
         $requestData['id'] = $id;
         $validator = Validator::make(
@@ -81,6 +125,16 @@ class UserController extends Controller
             $errors = $validator->errors();
             return new Response(['errors' => $errors->all()], 400);
         }
+
+        if (
+            $request->user()->cannot(
+                'view',
+                [User::class, $requestData['id']]
+            )
+        ) {
+            return new Response(['errors' => 'Access denied.'], 403);
+        }
+
         $userService = new UserService();
         $userArray = $userService->getUser($id);
 
@@ -128,6 +182,17 @@ class UserController extends Controller
                 return new Response(['errors' => $errorMessage], 400);
             }
         }
+
+        $userToUpdate = (new User())->find($requestData['id']);
+        if (
+            $request->user()->cannot(
+                'update',
+                [User::class, $userToUpdate]
+            )
+        ) {
+            return new Response(['errors' => 'Access denied.'], 403);
+        }
+
         $userService = new UserService();
         if ($userService->updateUser($requestData, $id)) {
             return new Response(['message' => 'Saved successfully!'], 200);
@@ -137,10 +202,11 @@ class UserController extends Controller
 
     /**
      * Deletes a user, and it's contacts from the database. The user to be deleted is find by the given ID.
+     * @param Request $request
      * @param $id
      * @return Response
      */
-    public function deleteUser($id): Response
+    public function deleteUser(Request $request, $id): Response
     {
         $requestData['id'] = $id;
         $validator = Validator::make(
@@ -154,10 +220,30 @@ class UserController extends Controller
             return new Response(['errors' => $errors->all()], 400);
         }
 
+        $userToDelete = (new User())->find($requestData['id']);
+        if (
+            $request->user()->cannot(
+                'delete',
+                [User::class, $userToDelete]
+            )
+        ) {
+            return new Response(['errors' => 'Access denied.'], 403);
+        }
+
         $userService = new UserService();
         if ($userService->deleteUser($id)) {
             return new Response(['message' => 'Deleted successfully!'], 200);
         }
         return new Response(['errors' => 'Error! Failed to delete the contact.'], 500);
+    }
+
+    public function getUserRoles(Request $request): Response
+    {
+        if ($request->user()->cannot('viewRoles', User::class)) {
+            return new Response(['errors' => 'Access denied.'], 403);
+        }
+        $userService = new UserService();
+        $userRoles = $userService->getRoles();
+        return new Response($userRoles, 200);
     }
 }
