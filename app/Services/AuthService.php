@@ -16,10 +16,19 @@ class AuthService
             $firstTimeLogin = true;
         }
 
+        if ($user->userUnitObject() === null) {
+            return [
+                'token' => $apiToken,
+                'first_time_login' => $firstTimeLogin,
+                'user_unit' => [],
+                'user_role' => $user->userRole()->toArray()
+            ];
+        }
+
         return [
             'token' => $apiToken,
             'first_time_login' => $firstTimeLogin,
-            'user_unit' => $user->userUnit()->toArray(),
+            'user_unit' => $user->userUnitObject()->toArray(),
             'user_role' => $user->userRole()->toArray()
         ];
     }
