@@ -63,12 +63,9 @@ class HealthUnitPolicy
     public function create(User $user): Response
     {
         $role = (new Role())->find($user->role_id);
-        if ($role->type === 'samu_administrator') {
-            return Response::allow();
-        }
         if ($role->type === 'health_unit_administrator') {
-            $userUnit = (new UserUnit())->find($user->id);
-            if (!is_null($userUnit)) {
+            $userUnit = (new UserUnit())->where('user_id', $user->id)->first();
+            if (is_null($userUnit) === false) {
                 return Response::deny();
             }
             return Response::allow();

@@ -50,7 +50,7 @@ class SamuService
         $userUnit = new UserUnit([
             'user_id' => $user->id,
             'samu_unit_id' => $samuUnit->id,
-            'health_unit_id' => 0,
+            'health_unit_id' => null,
             'created_by' => $user->id
         ]);
         $saveResult = $userUnit->save();

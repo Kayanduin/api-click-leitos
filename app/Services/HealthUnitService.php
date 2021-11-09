@@ -46,7 +46,7 @@ class HealthUnitService
         }
         $userUnit = new UserUnit([
             'user_id' => $user->id,
-            'samu_unit_id' => 0,
+            'samu_unit_id' => null,
             'health_unit_id' => $healthUnit->id,
             'created_by' => $user->id
         ]);

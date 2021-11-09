@@ -19,8 +19,8 @@ class SamuUnitPolicy
     public function create(User $user): Response
     {
         $role = (new Role())->find($user->role_id);
-        $userUnit = (new UserUnit())->find($user->id);
-        if (!is_null($userUnit)) {
+        $userUnit = (new UserUnit())->where('user_id', $user->id)->first();
+        if (is_null($userUnit) === false) {
             return Response::deny();
         }
         if ($role->type === 'samu_administrator') {

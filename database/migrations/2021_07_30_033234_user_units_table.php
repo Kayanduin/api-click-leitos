@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class UsersUnitsTable extends Migration
+class UserUnitsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,10 +13,10 @@ class UsersUnitsTable extends Migration
      */
     public function up()
     {
-        Schema::create('users_units', function (Blueprint $table) {
+        Schema::create('user_units', function (Blueprint $table) {
             $table->bigInteger('user_id', false, true);
-            $table->bigInteger('samu_unit_id', false, true)->nullable(false);
-            $table->bigInteger('health_unit_id', false, true)->nullable(false);
+            $table->bigInteger('samu_unit_id', false, true)->nullable(true);
+            $table->bigInteger('health_unit_id', false, true)->nullable(true);
             $table->bigInteger('created_by', false, true)->nullable(false);
             $table->timestamps();
 

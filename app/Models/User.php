@@ -36,8 +36,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $hidden = [
-        'password',
-        'first_time_login'
+        'password'
     ];
 
     /**
@@ -52,6 +51,7 @@ class User extends Authenticatable
         'password',
         'cpf',
         'first_time_login',
+        'role_id',
         'created_by',
         'created_at',
         'updated_at'
@@ -59,11 +59,32 @@ class User extends Authenticatable
 
     public function contacts()
     {
-        return $this->hasMany(UserContact::class);
+        return $this->hasMany(UserContact::class)->get();
     }
 
     public function userUnit()
     {
-        return $this->hasOne(UserUnit::class);
+        $userUnit = (new UserUnit())->where('user_id', $this->id)->first();
+        if (is_null($userUnit)) {
+            return null;
+        }
+        return $userUnit;
+    }
+
+    public function userUnitObject(): null|HealthUnit|SamuUnit
+    {
+        $userUnit = (new UserUnit())->where('user_id', $this->id)->first();
+        if (is_null($userUnit)) {
+            return null;
+        }
+        if ($userUnit->samu_unit_id === null) {
+            return (new HealthUnit())->find($userUnit->health_unit_id);
+        }
+        return (new SamuUnit())->find($userUnit->samu_unit_id);
+    }
+
+    public function userRole()
+    {
+        return (new Role())->find($this->role_id);
     }
 }

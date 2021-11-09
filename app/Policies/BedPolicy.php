@@ -40,10 +40,10 @@ class BedPolicy
         if ($role->type === 'health_unit_user' && $userUnit->health_unit_id === $bed->health_unit_id) {
             return Response::allow();
         }
-        if ($role->type === 'samu_administrator' && $userUnit->health_unit_id === $bed->health_unit_id) {
+        if ($role->type === 'samu_administrator') {
             return Response::allow();
         }
-        if ($role->type === 'samu_user' && $userUnit->health_unit_id === $bed->health_unit_id) {
+        if ($role->type === 'samu_user') {
             return Response::allow();
         }
         return Response::deny('Access denied.');

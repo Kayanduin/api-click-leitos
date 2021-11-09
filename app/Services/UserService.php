@@ -2,7 +2,9 @@
 
 namespace App\Services;
 
+use App\Models\HealthUnit;
 use App\Models\Role;
+use App\Models\SamuUnit;
 use App\Models\User;
 use App\Models\UserContact;
 use App\Models\UserUnit;
@@ -33,7 +35,7 @@ class UserService
             'password' => Hash::make($sanitizedFirstPassword, ['rounds' => 15]),
             'cpf' => $newUserData['cpf'],
             'first_time_login' => 1,
-            'role_id' => 1,
+            'role_id' => $newUserData['user_role_id'],
             'created_by' => $createdById
         ]);
         $saveResult = $user->save();
@@ -99,19 +101,62 @@ class UserService
      * Requests all users that are stored in the database.
      * @return array|string
      */
-    public function getAllUsers(): array|string
+    public function getAllUsersByUnitId(int|null $healthUnitId, int|null $samuUnitId): array|string
+    {
+        $unitToSearchId = null;
+        $unitInstance = null;
+        if ($healthUnitId != null) {
+            $unitToSearchId = $healthUnitId;
+            $unitInstance = 'healthUnit';
+        }
+        if ($samuUnitId != null) {
+            $unitToSearchId = $samuUnitId;
+            $unitInstance = 'samuUnit';
+        }
+        $resultArray = [];
+        $allUsers = User::all();
+        if (empty($allUsers->toArray())) {
+            return 'There is no user registered.';
+        }
+        foreach ($allUsers as $user) {
+            $userUnit = $user->userUnitObject();
+            $userContacts = $user->contacts();
+            $userRole = $user->userRole();
+
+            $userArray = $user->toArray();
+            $userArray['telephone_numbers'] = $userContacts->toArray();
+            $userArray['user_role'] = $userRole->toArray();
+
+            if ($unitInstance === 'healthUnit') {
+                if ($userUnit->id === $unitToSearchId && $userUnit instanceof HealthUnit) {
+                    $resultArray[] = $userArray;
+                }
+            }
+            if ($unitInstance === 'samuUnit') {
+                if ($userUnit->id === $unitToSearchId && $userUnit instanceof SamuUnit) {
+                    $resultArray[] = $userArray;
+                }
+            }
+        }
+        return $resultArray;
+    }
+
+    public function getAllUsers()
     {
         $resultArray = [];
         $allUsers = User::all();
         if (empty($allUsers->toArray())) {
             return 'There is no user registered.';
         }
-        foreach ($allUsers as $userArrayKey => $user) {
-            $resultArray[$userArrayKey] = $user->toArray();
-            $userId = $user->getAttribute('id');
-            $userContacts = UserContact::where('user_id', $userId)->get();
-            $userContactsArray = $userContacts->toArray();
-            $resultArray[$userArrayKey]['telephone_numbers'] = $userContactsArray;
+        foreach ($allUsers as $user) {
+            $userContacts = $user->contacts();
+            $userRole = $user->userRole();
+
+            $userArray = $user->toArray();
+            $userArray['telephone_numbers'] = $userContacts->toArray();
+            $userArray['user_role'] = $userRole->toArray();
+
+            $resultArray[] = $userArray;
         }
         return $resultArray;
     }

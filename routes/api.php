@@ -21,7 +21,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [AuthController::class, 'login']);
 
-Route::post('/create-first-user', [UserController::class, 'createUser'])->middleware('firstUser');
+Route::post('/create-first-user', [UserController::class, 'createFirstUser'])->middleware('firstUser');
 Route::post('/reset-password', [AuthController::class, 'resetPassword'])->middleware('auth:sanctum');
 
 Route::middleware(['auth:sanctum', 'firstLogin'])->group(function () {

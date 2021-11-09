@@ -99,7 +99,7 @@ class UserController extends Controller
         }
 
         $userService = new UserService();
-        $usersArray = $userService->getAllUsers();
+        $usersArray = $userService->getAllUsersByUnitId($healthUnitId, $samuUnitId);
         if (is_array($usersArray)) {
             return new Response($usersArray, 200);
         }
@@ -245,5 +245,46 @@ class UserController extends Controller
         $userService = new UserService();
         $userRoles = $userService->getRoles();
         return new Response($userRoles, 200);
+    }
+
+    /**
+     * Creates a new user in the database.
+     * @param Request $request
+     * @return Response
+     */
+    public function createFirstUser(Request $request): Response
+    {
+        $requestData = $request->all();
+        $validator = Validator::make(
+            $requestData,
+            [
+                'name' => ['required'],
+                'email' => ['required', 'email:rfc,dns'],
+                'cpf' => ['required', 'formato_cpf', 'cpf', 'unique:users,cpf'],
+                'telephone_numbers' => ['required'],
+                'telephone_numbers.*' => ['required', 'celular_com_ddd'],
+                'user_role_id' => ['required', 'integer', 'exists:roles,id', 'gt:0'],
+                'health_unit_id' => ['sometimes', 'required', 'exists:health_units,id', 'gt:0'],
+                'samu_unit_id' => ['sometimes', 'required', 'exists:samu_units,id', 'gt:0']
+            ],
+            [
+                'formato_cpf' => 'The field :attribute does not contain a valid CPF format.',
+                'cpf' => 'The field :attribute does not contain a valid CPF.',
+                'celular_com_ddd' => 'The field :attribute does not contains a telephone number in the' .
+                    ' following format: (00) 00000-0000 or (00) 0000-0000'
+            ]
+        );
+        if ($validator->fails()) {
+            $errors = $validator->errors();
+            return new Response(['errors' => $errors->all()], 400);
+        }
+
+        $userService = new UserService();
+
+        if (!$userService->createUser($requestData)) {
+            return new Response(['errors' => 'Error! The user could not be created.'], 500);
+        }
+
+        return new Response(['message' => 'Created user successfully!'], 201);
     }
 }

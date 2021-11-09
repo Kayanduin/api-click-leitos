@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Services\AuthService;
 use App\Services\UserService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -35,9 +36,10 @@ class AuthController extends Controller
             return new Response(['errors' => 'The provided credentials are incorrect.'], 401);
         }
 
-        $apiToken = $user->createToken($request->device_name)->plainTextToken;
+        $authService = new AuthService();
+        $loginData = $authService->login($user, $requestData);
 
-        return new Response(['token' => $apiToken], 200);
+        return new Response($loginData, 200);
     }
 
     /**
