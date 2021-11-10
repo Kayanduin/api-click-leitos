@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Role;
 use App\Models\User;
 use App\Models\UserContact;
 use App\Services\UserService;
@@ -23,7 +24,7 @@ class UserController extends Controller
             $requestData,
             [
                 'name' => ['required'],
-                'email' => ['required', 'email:rfc,dns'],
+                'email' => ['required', 'email:rfc,dns', 'unique:users,email'],
                 'cpf' => ['required', 'formato_cpf', 'cpf', 'unique:users,cpf'],
                 'telephone_numbers' => ['required'],
                 'telephone_numbers.*' => ['required', 'celular_com_ddd'],
@@ -43,6 +44,19 @@ class UserController extends Controller
             return new Response(['errors' => $errors->all()], 400);
         }
 
+        $healthUnitAdministratorRole = (new Role())->where('type', 'health_unit_administrator')->first();
+
+        if (
+            array_key_exists('health_unit_id', $requestData) === false &&
+            array_key_exists('samu_unit_id', $requestData) === false &&
+            $requestData['user_role_id'] != $healthUnitAdministratorRole->id
+        ) {
+            return new Response(
+                ['errors' => 'Error! The user could must have a Samu Unit id or a Health Unit id.'],
+                400
+            );
+        }
+
         if (
             $request->user()->cannot(
                 'create',
@@ -50,6 +64,18 @@ class UserController extends Controller
             )
         ) {
             return new Response(['errors' => 'Access denied.'], 403);
+        }
+
+        $userRole = (new Role())->find($requestData['user_role_id']);
+        if (array_key_exists('health_unit_id', $requestData) === false) {
+            if ($userRole->type === 'health_unit_administrator' || $userRole->type === 'health_unit_user') {
+                return new Response(['errors' => 'A Health Unit user must have a health_unit_id.'], 400);
+            }
+        }
+        if (array_key_exists('samu_unit_id', $requestData) === false) {
+            if ($userRole->type === 'samu_administrator' || $userRole->type === 'samu_user') {
+                return new Response(['errors' => 'A Samu Unit user must have a samu_unit_id.'], 400);
+            }
         }
 
         $userService = new UserService();
@@ -259,13 +285,10 @@ class UserController extends Controller
             $requestData,
             [
                 'name' => ['required'],
-                'email' => ['required', 'email:rfc,dns'],
+                'email' => ['required', 'email:rfc,dns', 'unique:users,email'],
                 'cpf' => ['required', 'formato_cpf', 'cpf', 'unique:users,cpf'],
                 'telephone_numbers' => ['required'],
                 'telephone_numbers.*' => ['required', 'celular_com_ddd'],
-                'user_role_id' => ['required', 'integer', 'exists:roles,id', 'gt:0'],
-                'health_unit_id' => ['sometimes', 'required', 'exists:health_units,id', 'gt:0'],
-                'samu_unit_id' => ['sometimes', 'required', 'exists:samu_units,id', 'gt:0']
             ],
             [
                 'formato_cpf' => 'The field :attribute does not contain a valid CPF format.',
@@ -278,6 +301,8 @@ class UserController extends Controller
             $errors = $validator->errors();
             return new Response(['errors' => $errors->all()], 400);
         }
+
+        $requestData['user_role_id'] = 1;
 
         $userService = new UserService();
 

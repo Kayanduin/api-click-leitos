@@ -49,6 +49,25 @@ class BedPolicy
         return Response::deny('Access denied.');
     }
 
+    public function viewByHealthUnitId(User $user, int $healthUnitId)
+    {
+        $role = (new Role())->find($user->role_id);
+        $userUnit = $user->userUnit();
+        if ($role->type === 'health_unit_administrator' && $userUnit->health_unit_id === $healthUnitId) {
+            return Response::allow();
+        }
+        if ($role->type === 'health_unit_user' && $userUnit->health_unit_id === $healthUnitId) {
+            return Response::allow();
+        }
+        if ($role->type === 'samu_administrator') {
+            return Response::allow();
+        }
+        if ($role->type === 'samu_user') {
+            return Response::allow();
+        }
+        return Response::deny('Access denied.');
+    }
+
     /**
      * Determine whether the user can create models.
      *

@@ -43,7 +43,7 @@ class BedController extends Controller
      */
     public function getBedsByHealthUnit(Request $request, int $healthUnitId): Response
     {
-        if ($request->user()->cannot('viewAny', Bed::class)) {
+        if ($request->user()->cannot('viewByHealthUnitId', [Bed::class, $healthUnitId])) {
             return new Response(['errors' => 'Access denied.'], 403);
         }
 

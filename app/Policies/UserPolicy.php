@@ -135,6 +135,18 @@ class UserPolicy
         ) {
             return Response::allow();
         }
+        if (
+            $loggedUserRole->type === 'samu_user'
+            && $user->id === $userToUpdate->id
+        ) {
+            return Response::allow();
+        }
+        if (
+            $loggedUserRole->type === 'health_unit_user'
+            && $user->id === $userToUpdate->id
+        ) {
+            return Response::allow();
+        }
         return Response::deny('Access denied.');
     }
 

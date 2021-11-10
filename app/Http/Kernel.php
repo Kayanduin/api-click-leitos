@@ -2,6 +2,7 @@
 
 namespace App\Http;
 
+use App\Http\Middleware\ValidateUserUnit;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 
 class Kernel extends HttpKernel
@@ -64,6 +65,7 @@ class Kernel extends HttpKernel
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'firstLogin' => \App\Http\Middleware\FirstLogin::class,
-        'firstUser' => \App\Http\Middleware\FirstUser::class
+        'firstUser' => \App\Http\Middleware\FirstUser::class,
+        'ValidateUserUnit' => \App\Http\Middleware\ValidateUserUnit::class
     ];
 }

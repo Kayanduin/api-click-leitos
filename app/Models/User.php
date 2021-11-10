@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
@@ -62,7 +63,7 @@ class User extends Authenticatable
         return $this->hasMany(UserContact::class)->get();
     }
 
-    public function userUnit()
+    public function userUnit(): UserUnit|null
     {
         $userUnit = (new UserUnit())->where('user_id', $this->id)->first();
         if (is_null($userUnit)) {

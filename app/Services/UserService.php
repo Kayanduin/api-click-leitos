@@ -59,7 +59,7 @@ class UserService
         if (array_key_exists('health_unit_id', $newUserData)) {
             $userUnit = new UserUnit([
                 'user_id' => $userId,
-                'samu_unit_id' => 0,
+                'samu_unit_id' => null,
                 'health_unit_id' => $newUserData['health_unit_id'],
                 'created_by' => $createdById
             ]);
@@ -78,7 +78,7 @@ class UserService
             $userUnit = new UserUnit([
                 'user_id' => $userId,
                 'samu_unit_id' => $newUserData['samu_unit_id'],
-                'health_unit_id' => 0,
+                'health_unit_id' => null,
                 'created_by' => $createdById
             ]);
             $saveResult = $userUnit->save();

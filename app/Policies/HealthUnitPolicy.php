@@ -87,9 +87,6 @@ class HealthUnitPolicy
         if ($role->type === 'health_unit_administrator' && $userUnit->health_unit_id === $healthUnitId) {
             return Response::allow();
         }
-        if ($role->type === 'samu_administrator') {
-            return Response::allow();
-        }
         return Response::deny('Access denied.');
     }
 
