@@ -97,6 +97,15 @@ class BedController extends Controller
             return new Response(['errors' => $exception->getMessage()], 500);
         }
 
+        $bed = (new Bed())
+            ->where('bed_type_id', '=', $validatedData['bed_type_id'])
+            ->where('health_unit_id', '=', $validatedData['health_unit_id'])
+            ->get();
+
+        if (empty($bed) === false) {
+            return new Response(['errors' => 'A bed of this type is already registered in this Health Unit.'], 403);
+        }
+
         if (
             $request->user()->cannot(
                 'create',
