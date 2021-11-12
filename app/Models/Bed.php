@@ -25,4 +25,14 @@ class Bed extends Model
         'health_unit_id',
         'created_by'
     ];
+
+    public function getBedType(): string
+    {
+        return (new BedType())->find($this->bed_type_id)->name;
+    }
+
+    public function getBedHealthUnit(): HealthUnit|null
+    {
+        return (new HealthUnit())->find($this->health_unit_id);
+    }
 }

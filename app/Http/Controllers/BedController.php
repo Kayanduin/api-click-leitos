@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Bed;
 use App\Services\BedService;
+use App\Services\MailService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Validator;
@@ -294,5 +295,25 @@ class BedController extends Controller
         $bedService = new BedService();
         $bedTypes = $bedService->getBedTypes();
         return new Response($bedTypes, 200);
+    }
+
+    public function notifyBedManagers(Request $request, int $bedId): Response
+    {
+        $requestArray['bed_id'] = $bedId;
+        $validator = Validator::make(
+            $requestArray,
+            [
+                'bed_id' => ['required', 'integer', 'exists:beds,id', 'gt:0']
+            ]
+        );
+        if ($validator->fails()) {
+            $errors = $validator->errors();
+            return new Response(['errors' => $errors->all()], 400);
+        }
+
+        $bedService = new BedService();
+        $bedService->notifyBedManagers($bedId);
+
+        return new Response(['message' => 'Notification sent.'], 200);
     }
 }

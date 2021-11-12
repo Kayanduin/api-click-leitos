@@ -6,18 +6,21 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
-class ResetPasswordMail extends Mailable
+class BedManagersNotificationMail extends Mailable
 {
     use Queueable;
     use SerializesModels;
+
+    public array $details;
 
     /**
      * Create a new message instance.
      *
      * @return void
      */
-    public function __construct()
+    public function __construct(array $details)
     {
+        $this->details = $details;
     }
 
     /**
@@ -27,6 +30,8 @@ class ResetPasswordMail extends Mailable
      */
     public function build()
     {
-        return $this->subject('Sua senha foi alterada!')->view('emails.ResetPasswordMail');
+        return $this->subject('Alerta! Necessidade de leito ' . $this->details['bed_type'])->view(
+            'emails.BedManagersNotificationMail'
+        );
     }
 }

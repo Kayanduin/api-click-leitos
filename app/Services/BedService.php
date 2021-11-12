@@ -6,6 +6,7 @@ use App\Models\Bed;
 use App\Models\BedType;
 use App\Models\HealthUnit;
 use App\Models\User;
+use App\Models\UserUnit;
 
 class BedService
 {
@@ -96,7 +97,24 @@ class BedService
             return false;
         }
         $bed->free_beds = $updatedFreeBedsAmount;
-        return $bed->save();
+        $saveResult = $bed->save();
+        if ($saveResult === false) {
+            return false;
+        }
+        $mailService = new MailService();
+        $userUnitAttachedToSamuUnit = (new UserUnit())->whereNotNull('samu_unit_id')->get();
+        foreach ($userUnitAttachedToSamuUnit as $userUnit) {
+            $user = (new User())->find($userUnit->user_id);
+            $mailService->sendFreeBedNumberUpdateMail(
+                $user->email,
+                'liberado',
+                $bed->getBedHealthUnit()->name,
+                $bed->getBedType(),
+                $bed->total_beds,
+                $bed->free_beds
+            );
+        }
+        return true;
     }
 
     /**
@@ -111,7 +129,24 @@ class BedService
             return false;
         }
         $bed->free_beds = $updatedFreeBedsAmount;
-        return $bed->save();
+        $saveResult = $bed->save();
+        if ($saveResult === false) {
+            return false;
+        }
+        $mailService = new MailService();
+        $userUnitAttachedToSamuUnit = (new UserUnit())->whereNotNull('samu_unit_id')->get();
+        foreach ($userUnitAttachedToSamuUnit as $userUnit) {
+            $user = (new User())->find($userUnit->user_id);
+            $mailService->sendFreeBedNumberUpdateMail(
+                $user->email,
+                'ocupado',
+                $bed->getBedHealthUnit()->name,
+                $bed->getBedType(),
+                $bed->total_beds,
+                $bed->free_beds
+            );
+        }
+        return true;
     }
 
     /**
@@ -120,5 +155,16 @@ class BedService
     public function getBedTypes(): array
     {
         return (new BedType())->get()->toArray();
+    }
+
+    public function notifyBedManagers(int $bedId): void
+    {
+        $mailService = new MailService();
+        $bed = (new Bed())->find($bedId);
+        $userUnitAttachedToBedHealthUnit = (new UserUnit())->where('health_unit_id', $bed->health_unit_id)->get();
+        foreach ($userUnitAttachedToBedHealthUnit as $userUnit) {
+            $user = (new User())->find($userUnit->user_id);
+            $mailService->sendBedManagersNotificationMail($user->email, $bed->getBedType());
+        }
     }
 }

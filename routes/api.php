@@ -69,5 +69,7 @@ Route::middleware(['auth:sanctum', 'firstLogin'])->group(function () {
             ->where('id', '[0-9]+');
         Route::delete('/samu-unit/{id}', [SamuController::class, 'delete'])
             ->where('id', '[0-9]+');
+        Route::post('/notify-bed-managers/{id}', [BedController::class, 'notifyBedManagers'])
+            ->where('id', '[0-9]+');
     });
 });

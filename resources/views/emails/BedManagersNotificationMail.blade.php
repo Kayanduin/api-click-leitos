@@ -61,7 +61,7 @@
                 width: 100% !important;
             }
 
-            .u-col>div {
+            .u-col > div {
                 margin: 0 auto;
             }
         }
@@ -154,23 +154,19 @@
             <div class="u-row-container" style="padding: 0px;background-color: transparent">
                 <div class="u-row"
                      style="Margin: 0 auto;min-width: 320px;max-width: 550px;overflow-wrap: break-word;word-wrap: break-word;word-break: break-word;background-color: transparent;">
-                    <div
-                            style="border-collapse: collapse;display: table;width: 100%;background-color: transparent;">
+                    <div style="border-collapse: collapse;display: table;width: 100%;background-color: transparent;">
                         <div class="u-col u-col-100"
                              style="max-width: 320px;min-width: 550px;display: table-cell;vertical-align: top;">
-                            <div
-                                    style="background-color: #ffffff;width: 100% !important;border-radius: 0px;-webkit-border-radius: 0px; -moz-border-radius: 0px;">
-                                <div
-                                        style="padding: 0px;border-top: 0px solid transparent;border-left: 0px solid transparent;border-right: 0px solid transparent;border-bottom: 0px solid transparent;border-radius: 0px;-webkit-border-radius: 0px; -moz-border-radius: 0px;">
-                                    <table style="font-family:'Lato',sans-serif;" role="presentation"
-                                           cellpadding="0" cellspacing="0" width="100%" border="0">
+                            <div style="background-color: #ffffff;width: 100% !important;border-radius: 0px;-webkit-border-radius: 0px; -moz-border-radius: 0px;">
+                                <div style="padding: 0px;border-top: 0px solid transparent;border-left: 0px solid transparent;border-right: 0px solid transparent;border-bottom: 0px solid transparent;border-radius: 0px;-webkit-border-radius: 0px; -moz-border-radius: 0px;">
+                                    <table style="font-family:'Lato',sans-serif;" role="presentation" cellpadding="0"
+                                           cellspacing="0" width="100%" border="0">
                                         <tbody>
                                         <tr>
                                             <td class="v-container-padding-padding"
                                                 style="overflow-wrap:break-word;word-break:break-word;padding:10px;font-family:'Lato',sans-serif;"
                                                 align="left">
-                                                <table width="100%" cellpadding="0" cellspacing="0"
-                                                       border="0">
+                                                <table width="100%" cellpadding="0" cellspacing="0" border="0">
                                                     <tr>
                                                         <td style="padding-right: 0px;padding-left: 0px;"
                                                             align="center">
@@ -178,7 +174,7 @@
                                                                  src="https://user-images.githubusercontent.com/31261531/139511654-40511e31-c33d-4ea0-a1ba-ad3605c0bc69.png"
                                                                  alt="" title=""
                                                                  style="outline: none;text-decoration: none;-ms-interpolation-mode: bicubic;clear: both;display: inline-block !important;border: none;height: auto;float: none;width: 100%;max-width: 100px;"
-                                                                 width="100" />
+                                                                 width="100"/>
                                                         </td>
                                                     </tr>
                                                 </table>
@@ -214,9 +210,7 @@
                                                         style="line-height: 140%; text-align: center; word-wrap: break-word;">
                                                     <p style="font-size: 14px; line-height: 140%;"><span
                                                                 style="font-size: 32px; line-height: 44.8px;"><strong><span
-                                                                        style="line-height: 44.8px; font-size: 32px;">A
-                                                                                senha da sua conta no Click Leitos foi
-                                                                                alterada com sucesso!</span></strong></span>
+                                                                        style="line-height: 44.8px; font-size: 32px;">Paciente a caminho!</span></strong></span>
                                                     </p>
                                                 </div>
                                             </td>
@@ -248,9 +242,9 @@
                                                 align="left">
                                                 <h4
                                                         style="margin: 0px; color: #000000; line-height: 140%; text-align: left; word-wrap: break-word; font-weight: normal; font-family: 'Lato',sans-serif; font-size: 16px;">
-                                                    Caso você não tenha feito essa alteração, entre em
-                                                    contato <strong>imediatamente</strong> com um dos
-                                                    administradores do sistema.
+                                                    Uma ambulância do SAMU está a caminho, transportando um paciente que
+                                                    <strong>necessitará de um leito {{$details['bed_type']}}</strong>.
+                                                    Por favor, se preparar para receber o paciente.
                                                 </h4>
                                             </td>
                                         </tr>

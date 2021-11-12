@@ -1,21 +1,4 @@
-{{--<!doctype html>--}}
-{{--<html lang="pt-BR">--}}
-{{--<head>--}}
-{{--    <meta charset="UTF-8">--}}
-{{--    <meta name="viewport"--}}
-{{--          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">--}}
-{{--    <meta http-equiv="X-UA-Compatible" content="ie=edge">--}}
-{{--</head>--}}
-{{--<body>--}}
-
-{{--<h1>Sua conta foi criada com sucesso!</h1>--}}
-{{--<p>Essa é sua primeira senha: {{$details['password']}}</p>--}}
-{{--<p>Você deve acessar o sistema e incluir uma nova senha para sua conta.</p>--}}
-
-{{--</body>--}}
-{{--</html>--}}
-
-        <!doctype html>
+<!doctype html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -248,7 +231,7 @@
                                                 style="overflow-wrap:break-word;word-break:break-word;padding:15px 10px 10px 15px;font-family:'Lato',sans-serif;"
                                                 align="left">
                                                 <h4 style="margin: 0px; color: #000000; line-height: 140%; text-align: left; word-wrap: break-word; font-weight: normal; font-family: 'Lato',sans-serif; font-size: 16px;">
-                                                    Ol&aacute;,<br/><br/>Estamos muito felizes em lhe dar as boas vindas
+                                                    Ol&aacute;, {{$details['user_name']}}!<br/><br/>Estamos muito felizes em lhe dar as boas vindas
                                                     ao mais novo sistema de monitoramento de leitos da regi&atilde;o. 😊
                                                 </h4>
                                             </td>
@@ -264,8 +247,8 @@
                                                 align="left">
                                                 <h4 style="margin: 0px; color: #000000; line-height: 140%; text-align: left; word-wrap: break-word; font-weight: normal; font-family: 'Lato',sans-serif; font-size: 16px;">
                                                     Se voc&ecirc; est&aacute; recebendo esse e-mail &eacute; porque
-                                                    acaba de ser cadastrado na plataforma, para come&ccedil;ar
-                                                    utiliza-la basta apenas clicar no bot&atilde;o abaixo e redefinir
+                                                    acaba de ser cadastrado na plataforma!<br><br>Para come&ccedil;ar
+                                                    a utiliz&aacute;-la basta apenas clicar no bot&atilde;o abaixo e redefinir
                                                     sua senha de acesso.
                                                 </h4>
                                             </td>
@@ -311,7 +294,7 @@
                                                 style="overflow-wrap:break-word;word-break:break-word;padding:10px;font-family:'Lato',sans-serif;"
                                                 align="left">
                                                 <div align="center">
-                                                    <a href="https://github.com/" target="_blank"
+                                                    <a href="https://jose-claudivan.github.io/click-leitos-TCC/" target="_blank"
                                                        style="box-sizing: border-box;display: inline-block;font-family:'Lato',sans-serif;text-decoration: none;-webkit-text-size-adjust: none;text-align: center;color: #000000; background-color: #ffffff; border-radius: 10px;-webkit-border-radius: 10px; -moz-border-radius: 10px; width:auto; max-width:100%; overflow-wrap: break-word; word-break: break-word; word-wrap:break-word; mso-border-alt: none; border: solid 3px #006d0b">
                                                         <span style="display:block;padding:10px 30px;line-height:120%;"><span
                                                                     style="font-size: 16px; line-height: 19.2px; font-family: Lato, sans-serif;">Click Leitos</span></span>

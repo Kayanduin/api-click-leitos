@@ -3,21 +3,25 @@
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
-class ResetPasswordMail extends Mailable
+class FreeBedNumberUpdateMail extends Mailable
 {
     use Queueable;
     use SerializesModels;
+
+    public array $details;
 
     /**
      * Create a new message instance.
      *
      * @return void
      */
-    public function __construct()
+    public function __construct(array $details)
     {
+        $this->details = $details;
     }
 
     /**
@@ -27,6 +31,6 @@ class ResetPasswordMail extends Mailable
      */
     public function build()
     {
-        return $this->subject('Sua senha foi alterada!')->view('emails.ResetPasswordMail');
+        return $this->subject('Leito atualizado!')->view('emails.FreeBedNumberUpdateMail');
     }
 }

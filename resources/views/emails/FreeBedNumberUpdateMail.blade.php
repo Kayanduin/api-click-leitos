@@ -214,9 +214,7 @@
                                                         style="line-height: 140%; text-align: center; word-wrap: break-word;">
                                                     <p style="font-size: 14px; line-height: 140%;"><span
                                                                 style="font-size: 32px; line-height: 44.8px;"><strong><span
-                                                                        style="line-height: 44.8px; font-size: 32px;">A
-                                                                                senha da sua conta no Click Leitos foi
-                                                                                alterada com sucesso!</span></strong></span>
+                                                                        style="line-height: 44.8px; font-size: 32px;">Leito {{strtolower($details['bed_type_name'])}} {{$details['action_type']}}</span></strong></span>
                                                     </p>
                                                 </div>
                                             </td>
@@ -248,9 +246,10 @@
                                                 align="left">
                                                 <h4
                                                         style="margin: 0px; color: #000000; line-height: 140%; text-align: left; word-wrap: break-word; font-weight: normal; font-family: 'Lato',sans-serif; font-size: 16px;">
-                                                    Caso você não tenha feito essa alteração, entre em
-                                                    contato <strong>imediatamente</strong> com um dos
-                                                    administradores do sistema.
+                                                    A quantidade de leitos do tipo <strong>{{strtolower($details['bed_type_name'])}}</strong> foi alterada pela Unidade de
+                                                    Saúde <strong>{{$details['health_unit_name']}}.</strong><br><br>Total de leitos:
+                                                    <strong>{{$details['total_beds']}}</strong><br><br>Leitos livres:
+                                                    <strong>{{$details['free_beds']}}</strong>
                                                 </h4>
                                             </td>
                                         </tr>
