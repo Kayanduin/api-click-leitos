@@ -3,6 +3,8 @@
 namespace App\Exceptions;
 
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Http\JsonResponse;
+use Symfony\Component\Routing\Exception\RouteNotFoundException;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -37,5 +39,33 @@ class Handler extends ExceptionHandler
         $this->reportable(function (Throwable $e) {
             //
         });
+    }
+
+    public function render($request, Throwable $exception): JsonResponse
+    {
+        if ($this->isHttpException($exception)) {
+            switch ($exception->getStatusCode()) {
+                case 404:
+                    return response()->json(
+                        ['errors' => 'Invalid route.'],
+                        404
+                    );
+                case 500:
+                    return response()->json(
+                        ['errors' => 'Internal error.'],
+                        500
+                    );
+            }
+        }
+        if ($exception instanceof RouteNotFoundException) {
+            return response()->json(
+                ['errors' => 'Authentication error.'],
+                401
+            );
+        }
+        return response()->json(
+            ['errors' => 'Internal error.'],
+            500
+        );
     }
 }
