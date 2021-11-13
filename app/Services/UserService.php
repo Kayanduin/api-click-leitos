@@ -93,7 +93,7 @@ class UserService
         }
 
         $mailService = new MailService();
-        $mailService->sendFirstPasswordMail($sanitizedFirstPassword, $user->email);
+        $mailService->sendFirstPasswordMail($sanitizedFirstPassword, $user->email, $user->name);
         return true;
     }
 

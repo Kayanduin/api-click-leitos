@@ -10,10 +10,11 @@ use Illuminate\Support\Facades\Mail;
 
 class MailService
 {
-    public function sendFirstPasswordMail(string $firstPassword, string $userEmail): void
+    public function sendFirstPasswordMail(string $firstPassword, string $userEmail, string $userName): void
     {
         $details = [
-            'password' => $firstPassword
+            'password' => $firstPassword,
+            'user_name' => $userName
         ];
 
         Mail::to($userEmail)->send(new FirstPasswordMail($details));
