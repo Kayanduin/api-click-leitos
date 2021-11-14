@@ -229,6 +229,7 @@ class UserService
                 return false;
             }
         }
+        $user->tokens()->delete();
         $user->deactivated_user = true;
         $user->email = $user->id;
         $user->cpf = $user->id;
