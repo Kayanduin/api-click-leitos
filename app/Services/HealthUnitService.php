@@ -128,6 +128,24 @@ class HealthUnitService
 
     public function deleteHealthUnit(int $healthUnitId): ?bool
     {
+        $usersAttachedToThisHealthUnit = (new UserUnit())->where('health_unit_id', '=', $healthUnitId)->get();
+        $userService = new UserService();
+        foreach ($usersAttachedToThisHealthUnit as $user) {
+            $deleteResult = $userService->deleteUser($user->id);
+            if ($deleteResult === false) {
+                return false;
+            }
+        }
+
+        $bedsAttachedToThisHealthUnit = (new Bed())->where('health_unit_id', '=', $healthUnitId)->get();
+        $bedService = new BedService();
+        foreach ($bedsAttachedToThisHealthUnit as $bed) {
+            $deleteResult = $bedService->deleteBed($bed->id);
+            if ($deleteResult === false) {
+                return false;
+            }
+        }
+
         $healthUnit = (new HealthUnit())->find($healthUnitId);
         $healthUnitContacts = (new HealthUnitContact())->where('health_unit_id', $healthUnitId)->get();
         foreach ($healthUnitContacts as $contact) {
@@ -136,13 +154,14 @@ class HealthUnitService
                 return false;
             }
         }
-        $deleteResult = $healthUnit->delete();
+        $healthUnitAddress = (new Address())->find($healthUnit->getAttribute('address_id'));
+
+        $deleteResult = $healthUnitAddress->delete();
         if ($deleteResult === false) {
             return false;
         }
-        $healthUnitAddress = (new Address())->find($healthUnit->getAttribute('address_id'));
 
-        return $healthUnitAddress->delete();
+        return $healthUnit->delete();
     }
 
     /**

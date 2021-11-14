@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Bed;
 use App\Services\BedService;
-use App\Services\MailService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Validator;
@@ -102,7 +101,7 @@ class BedController extends Controller
             ->where('health_unit_id', '=', $validatedData['health_unit_id'])
             ->get();
 
-        if (empty($bed) === false) {
+        if (empty($bed->toArray()) === false) {
             return new Response(['errors' => 'A bed of this type is already registered in this Health Unit.'], 403);
         }
 

@@ -106,6 +106,15 @@ class SamuService
 
     public function deleteSamuUnit(int $samuUnitId): bool
     {
+        $usersAttachedToThisSamuUnit = (new UserUnit())->where('samu_unit_id', '=', $samuUnitId)->get();
+        $userService = new UserService();
+        foreach ($usersAttachedToThisSamuUnit as $user) {
+            $deleteResult = $userService->deleteUser($user->id);
+            if ($deleteResult === false) {
+                return false;
+            }
+        }
+
         $samuUnit = (new SamuUnit())->find($samuUnitId);
         $samuUnitContacts = (new SamuUnitContact())->where('samu_unit_id', $samuUnitId)->get();
         foreach ($samuUnitContacts as $contact) {
@@ -114,12 +123,13 @@ class SamuService
                 return false;
             }
         }
-        $deleteResult = $samuUnit->delete();
+        $samuUnitAddress = (new Address())->find($samuUnit->address_id);
+
+        $deleteResult = $samuUnitAddress->delete();
         if ($deleteResult === false) {
             return false;
         }
-        $samuUnitAddress = (new Address())->find($samuUnit->address_id);
 
-        return $samuUnitAddress->delete();
+        return $samuUnit->delete();
     }
 }

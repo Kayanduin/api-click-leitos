@@ -36,6 +36,7 @@ class UserService
             'cpf' => $newUserData['cpf'],
             'first_time_login' => 1,
             'role_id' => $newUserData['user_role_id'],
+            'deactivated_user' => false,
             'created_by' => $createdById
         ]);
         $saveResult = $user->save();
@@ -141,7 +142,7 @@ class UserService
         return $resultArray;
     }
 
-    public function getAllUsers()
+    public function getAllUsers(): array|string
     {
         $resultArray = [];
         $allUsers = User::all();
@@ -228,7 +229,10 @@ class UserService
                 return false;
             }
         }
-        return $user->delete();
+        $user->deactivated_user = true;
+        $user->email = $user->id;
+        $user->cpf = $user->id;
+        return $user->save();
     }
 
     /**

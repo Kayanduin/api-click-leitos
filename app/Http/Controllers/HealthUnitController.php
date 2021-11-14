@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\HealthUnit;
 use App\Models\HealthUnitContact;
+use App\Models\UserUnit;
 use App\Services\HealthUnitService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -149,7 +150,7 @@ class HealthUnitController extends Controller
 
     public function deleteHealthUnit(Request $request, int $healthUnitId): Response
     {
-        if ($request->user()->cannot('delete', HealthUnit::class)) {
+        if ($request->user()->cannot('delete', [HealthUnit::class, $healthUnitId])) {
             return new Response(['errors' => 'Access denied.'], 403);
         }
 

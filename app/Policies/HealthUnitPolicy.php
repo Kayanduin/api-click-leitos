@@ -94,12 +94,17 @@ class HealthUnitPolicy
      * Determine whether the user can delete the model.
      *
      * @param User $user
+     * @param int $healthUnitId
      * @return Response
      */
-    public function delete(User $user): Response
+    public function delete(User $user, int $healthUnitId): Response
     {
         $role = (new Role())->find($user->role_id);
         if ($role->type === 'samu_administrator') {
+            return Response::allow();
+        }
+        $userUnit = $user->userUnit();
+        if ($role->type === 'health_unit_administrator' && $userUnit->health_unit_id === $healthUnitId) {
             return Response::allow();
         }
         return Response::deny('Access denied.');

@@ -171,6 +171,13 @@ class UserPolicy
         if ($loggedUserRole->type === 'samu_administrator' && $userToDelete->role_id === $samuUnitUserRole->id) {
             return Response::allow();
         }
+        if ($loggedUserRole->type === 'health_unit_administrator' && $user->id === $userToDelete->id) {
+            return Response::allow();
+        }
+        if ($loggedUserRole->type === 'samu_administrator' && $user->id === $userToDelete->id) {
+            return Response::allow();
+        }
+
         return Response::deny('Access denied.');
     }
 

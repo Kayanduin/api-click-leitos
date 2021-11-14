@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Laravel\Sanctum\HasApiTokens;
@@ -28,6 +29,7 @@ class User extends Authenticatable
         'cpf',
         'first_time_login',
         'role_id',
+        'deactivated_user',
         'created_by'
     ];
 
@@ -37,7 +39,8 @@ class User extends Authenticatable
      * @var array
      */
     protected $hidden = [
-        'password'
+        'password',
+        'deactivated_user'
     ];
 
     /**
@@ -58,7 +61,14 @@ class User extends Authenticatable
         'updated_at'
     ];
 
-    public function contacts()
+    protected static function booted()
+    {
+        static::addGlobalScope('excluded', function (Builder $builder) {
+            $builder->where('deactivated_user', '=', false);
+        });
+    }
+
+    public function contacts(): Collection
     {
         return $this->hasMany(UserContact::class)->get();
     }
@@ -84,7 +94,7 @@ class User extends Authenticatable
         return (new SamuUnit())->find($userUnit->samu_unit_id);
     }
 
-    public function userRole()
+    public function userRole(): Model|Collection|Role|array|null
     {
         return (new Role())->find($this->role_id);
     }

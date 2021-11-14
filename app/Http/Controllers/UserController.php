@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\UserContact;
+use App\Models\UserUnit;
 use App\Services\UserService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -67,13 +68,13 @@ class UserController extends Controller
         }
 
         $userRole = (new Role())->find($requestData['user_role_id']);
-        if (array_key_exists('health_unit_id', $requestData) === false) {
-            if ($userRole->type === 'health_unit_administrator' || $userRole->type === 'health_unit_user') {
+        if (array_key_exists('health_unit_id', $requestData)) {
+            if ($userRole->type === 'health_unit_user') {
                 return new Response(['errors' => 'A Health Unit user must have a health_unit_id.'], 400);
             }
         }
-        if (array_key_exists('samu_unit_id', $requestData) === false) {
-            if ($userRole->type === 'samu_administrator' || $userRole->type === 'samu_user') {
+        if (array_key_exists('samu_unit_id', $requestData)) {
+            if ($userRole->type === 'samu_user') {
                 return new Response(['errors' => 'A Samu Unit user must have a samu_unit_id.'], 400);
             }
         }
