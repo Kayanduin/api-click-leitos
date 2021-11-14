@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\UserContact;
-use App\Models\UserUnit;
 use App\Services\UserService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -153,6 +152,10 @@ class UserController extends Controller
             return new Response(['errors' => $errors->all()], 400);
         }
 
+        if (is_null((new User())->find($id))) {
+            return new Response(['errors' => 'This user doest not exists.'], 400);
+        }
+
         if (
             $request->user()->cannot(
                 'view',
@@ -210,6 +213,10 @@ class UserController extends Controller
             }
         }
 
+        if (is_null((new User())->find($id))) {
+            return new Response(['errors' => 'This user doest not exists.'], 400);
+        }
+
         $userToUpdate = (new User())->find($requestData['id']);
         if (
             $request->user()->cannot(
@@ -245,6 +252,10 @@ class UserController extends Controller
         if ($validator->fails()) {
             $errors = $validator->errors();
             return new Response(['errors' => $errors->all()], 400);
+        }
+
+        if (is_null((new User())->find($id))) {
+            return new Response(['errors' => 'This user doest not exists.'], 400);
         }
 
         $userToDelete = (new User())->find($requestData['id']);
