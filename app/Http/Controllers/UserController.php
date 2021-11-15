@@ -98,16 +98,17 @@ class UserController extends Controller
     /**
      * Returns an associative array with all the users stored in the database.
      * @param Request $request
+     * @param int $samuUnitId
      * @return Response
      */
-    public function getAllUsers(Request $request): Response
+    public function getAllSamuUnitUsersById(Request $request, int $samuUnitId): Response
     {
         $requestData = $request->all();
+        $requestData['id'] = $samuUnitId;
         $validator = Validator::make(
             $requestData,
             [
-                'health_unit_id' => ['required_without:samu_unit_id', 'integer', 'exists:health_units,id', 'gt:0'],
-                'samu_unit_id' => ['required_without:health_unit_id', 'integer', 'exists:samu_units,id', 'gt:0'],
+                'id' => ['required', 'integer', 'exists:samu_units,id', 'gt:0'],
             ]
         );
         if ($validator->fails()) {
@@ -115,13 +116,6 @@ class UserController extends Controller
             return new Response(['errors' => $errors->all()], 400);
         }
         $healthUnitId = null;
-        $samuUnitId = null;
-        if (array_key_exists('samu_unit_id', $requestData)) {
-            $samuUnitId = $requestData['samu_unit_id'];
-        }
-        if (array_key_exists('health_unit_id', $requestData)) {
-            $healthUnitId = $requestData['health_unit_id'];
-        }
 
         if (
             $request->user()->cannot(
@@ -133,12 +127,52 @@ class UserController extends Controller
         }
 
         $userService = new UserService();
-        $usersArray = $userService->getAllUsersByUnitId($healthUnitId, $samuUnitId);
+        $usersArray = $userService->getAllUsersFromSamuUnit($samuUnitId);
         if (is_array($usersArray)) {
             return new Response($usersArray, 200);
         }
         return new Response(['message' => 'There is no user registered.'], 200);
     }
+
+    /**
+     * Returns an associative array with all the users stored in the database.
+     * @param Request $request
+     * @param int $healthUnitId
+     * @return Response
+     */
+    public function getAllHealthUnitUsersById(Request $request, int $healthUnitId): Response
+    {
+        $requestData = $request->all();
+        $requestData['id'] = $healthUnitId;
+        $validator = Validator::make(
+            $requestData,
+            [
+                'id' => ['required_without:health_unit_id', 'integer', 'exists:samu_units,id', 'gt:0'],
+            ]
+        );
+        if ($validator->fails()) {
+            $errors = $validator->errors();
+            return new Response(['errors' => $errors->all()], 400);
+        }
+        $samuUnitId = null;
+
+        if (
+            $request->user()->cannot(
+                'viewAnyByUnit',
+                [User::class, $healthUnitId, $samuUnitId]
+            )
+        ) {
+            return new Response(['errors' => 'Access denied.'], 403);
+        }
+
+        $userService = new UserService();
+        $usersArray = $userService->getAllUsersFromHealthUnit($healthUnitId);
+        if (is_array($usersArray)) {
+            return new Response($usersArray, 200);
+        }
+        return new Response(['message' => 'There is no user registered.'], 200);
+    }
+
 
     /**
      * Returns an associative array with the user stored in the database that matches the user ID.

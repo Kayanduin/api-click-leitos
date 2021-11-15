@@ -100,20 +100,11 @@ class UserService
 
     /**
      * Requests all users that are stored in the database.
+     * @param int $samuUnitId
      * @return array|string
      */
-    public function getAllUsersByUnitId(int|null $healthUnitId, int|null $samuUnitId): array|string
+    public function getAllUsersFromSamuUnit(int $samuUnitId): array|string
     {
-        $unitToSearchId = null;
-        $unitInstance = null;
-        if ($healthUnitId != null) {
-            $unitToSearchId = $healthUnitId;
-            $unitInstance = 'healthUnit';
-        }
-        if ($samuUnitId != null) {
-            $unitToSearchId = $samuUnitId;
-            $unitInstance = 'samuUnit';
-        }
         $resultArray = [];
         $allUsers = User::all();
         if (empty($allUsers->toArray())) {
@@ -128,15 +119,36 @@ class UserService
             $userArray['telephone_numbers'] = $userContacts->toArray();
             $userArray['user_role'] = $userRole->toArray();
 
-            if ($unitInstance === 'healthUnit') {
-                if ($userUnit->id === $unitToSearchId && $userUnit instanceof HealthUnit) {
-                    $resultArray[] = $userArray;
-                }
+            if ($userUnit->id === $samuUnitId && $userUnit instanceof SamuUnit) {
+                $resultArray[] = $userArray;
             }
-            if ($unitInstance === 'samuUnit') {
-                if ($userUnit->id === $unitToSearchId && $userUnit instanceof SamuUnit) {
-                    $resultArray[] = $userArray;
-                }
+        }
+        return $resultArray;
+    }
+
+    /**
+     * Requests all users that are stored in the database.
+     * @param int $healthUnitId
+     * @return array|string
+     */
+    public function getAllUsersFromHealthUnit(int $healthUnitId): array|string
+    {
+        $resultArray = [];
+        $allUsers = User::all();
+        if (empty($allUsers->toArray())) {
+            return 'There is no user registered.';
+        }
+        foreach ($allUsers as $user) {
+            $userUnit = $user->userUnitObject();
+            $userContacts = $user->contacts();
+            $userRole = $user->userRole();
+
+            $userArray = $user->toArray();
+            $userArray['telephone_numbers'] = $userContacts->toArray();
+            $userArray['user_role'] = $userRole->toArray();
+
+            if ($userUnit->id === $healthUnitId && $userUnit instanceof HealthUnit) {
+                $resultArray[] = $userArray;
             }
         }
         return $resultArray;

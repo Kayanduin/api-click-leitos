@@ -30,7 +30,7 @@ class AuthController extends Controller
             return new Response(['errors' => $errors->all()], 401);
         }
 
-        $user = (new User())->where('email', $request->email)->first();
+        $user = (new User())->where('email', '=', $request->email)->first();
 
         if (!$user || !Hash::check($request->password, $user->password)) {
             return new Response(['errors' => 'The provided credentials are incorrect.'], 401);

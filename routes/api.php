@@ -32,7 +32,10 @@ Route::middleware(['auth:sanctum', 'firstLogin'])->group(function () {
     Route::post('/samu-unit', [SamuController::class, 'create']);
 
     Route::middleware(['ValidateUserUnit'])->group(function () {
-        Route::get('/users', [UserController::class, 'getAllUsers']);
+        Route::get('/samu-unit-users/{id}', [UserController::class, 'getAllSamuUnitUsersById'])
+            ->where('id', '[0-9]+');
+        Route::get('/health-unit-users/{id}', [UserController::class, 'getAllHealthUnitUsersById'])
+            ->where('id', '[0-9]+');
         Route::post('/users', [UserController::class, 'createUser']);
         Route::get('/users/{id}', [UserController::class, 'getUser'])
             ->where('id', '[0-9]+');
