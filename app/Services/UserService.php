@@ -119,8 +119,10 @@ class UserService
             $userArray['telephone_numbers'] = $userContacts->toArray();
             $userArray['user_role'] = $userRole->toArray();
 
-            if ($userUnit->id === $samuUnitId && $userUnit instanceof SamuUnit) {
-                $resultArray[] = $userArray;
+            if (!empty($userUnit)) {
+                if ($userUnit->id === $samuUnitId && $userUnit instanceof SamuUnit) {
+                    $resultArray[] = $userArray;
+                }
             }
         }
         return $resultArray;
@@ -147,8 +149,10 @@ class UserService
             $userArray['telephone_numbers'] = $userContacts->toArray();
             $userArray['user_role'] = $userRole->toArray();
 
-            if ($userUnit->id === $healthUnitId && $userUnit instanceof HealthUnit) {
-                $resultArray[] = $userArray;
+            if (!empty($userUnit)) {
+                if ($userUnit->id === $healthUnitId && $userUnit instanceof HealthUnit) {
+                    $resultArray[] = $userArray;
+                }
             }
         }
         return $resultArray;
