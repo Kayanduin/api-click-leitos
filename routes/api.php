@@ -36,6 +36,10 @@ Route::middleware(['auth:sanctum', 'firstLogin'])->group(function () {
             ->where('id', '[0-9]+');
         Route::get('/health-unit-users/{id}', [UserController::class, 'getAllHealthUnitUsersById'])
             ->where('id', '[0-9]+');
+        Route::get(
+            '/health-unit-admin-users',
+            [UserController::class, 'getAllHealthUnitAdminUsersCreatedByLoggedUser']
+        );
         Route::post('/users', [UserController::class, 'createUser']);
         Route::get('/users/{id}', [UserController::class, 'getUser'])
             ->where('id', '[0-9]+');

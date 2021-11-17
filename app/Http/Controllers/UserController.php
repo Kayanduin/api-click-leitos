@@ -366,4 +366,20 @@ class UserController extends Controller
 
         return new Response(['message' => 'Created user successfully!'], 201);
     }
+
+    public function getAllHealthUnitAdminUsersCreatedByLoggedUser(Request $request): Response
+    {
+        if (
+            $request->user()->cannot('viewHelathUnitAdmin', User::class)
+        ) {
+            return new Response(['errors' => 'Access denied.'], 403);
+        }
+
+        $userService = new UserService();
+        $usersArray = $userService->getAllHealthUnitAdminCreatedByLoggedUser();
+        if (is_array($usersArray)) {
+            return new Response($usersArray, 200);
+        }
+        return new Response(['message' => 'There is no user registered.'], 200);
+    }
 }

@@ -65,6 +65,23 @@ class UserPolicy
     }
 
     /**
+     * Determine whether the user can view any models.
+     *
+     * @param User $user
+     * @param int|null $healthUnitId
+     * @param int|null $samuUnitId
+     * @return Response
+     */
+    public function viewHelathUnitAdmin(User $user): Response
+    {
+        $loggedUserRole = (new Role())->find($user->role_id);
+        if ($loggedUserRole->type === 'samu_administrator') {
+            return Response::allow();
+        }
+        return Response::deny();
+    }
+
+    /**
      * Determine whether the user can create models.
      *
      * @param User $user

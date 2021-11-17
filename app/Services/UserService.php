@@ -163,6 +163,37 @@ class UserService
         return $resultArray;
     }
 
+    /**
+     * Requests all users that are stored in the database.
+     * @return array|string
+     */
+    public function getAllHealthUnitAdminCreatedByLoggedUser(): array|string
+    {
+        /** @var User $loggedUser */
+        $loggedUser = auth()->user();
+        $resultArray = [];
+        $allUsers = User::all();
+        if (empty($allUsers->toArray())) {
+            return 'There is no user registered.';
+        }
+        foreach ($allUsers as $user) {
+            if ($user->created_by === $loggedUser->id) {
+                $userUnit = $user->userUnitObject();
+                $userContacts = $user->contacts();
+                $userRole = $user->userRole();
+
+                $userArray = $user->toArray();
+                $userArray['telephone_numbers'] = $userContacts->toArray();
+                $userArray['user_role'] = $userRole->toArray();
+
+                if ($userUnit instanceof HealthUnit) {
+                    $resultArray[] = $userArray;
+                }
+            }
+        }
+        return $resultArray;
+    }
+
     public function getAllUsers(): array|string
     {
         $resultArray = [];
