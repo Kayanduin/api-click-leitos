@@ -102,48 +102,48 @@ class UserPolicy
     public function update(User $user, User $userToUpdate): Response
     {
         $loggedUserRole = (new Role())->find($user->role_id);
-        $healthUnitUserRole = (new Role())->where('type', 'health_unit_user')->first();
+        $healthUnitUserRole = (new Role())->where('type', '=', 'health_unit_user')->first();
         if (
-            $loggedUserRole->type === 'health_unit_administrator'
-            && $userToUpdate->role_id === $healthUnitUserRole->id
+            $loggedUserRole->type === 'health_unit_administrator' &&
+            $userToUpdate->role_id === $healthUnitUserRole->id
         ) {
             return Response::allow();
         }
         if (
-            $loggedUserRole->type === 'health_unit_administrator'
-            && $user->id === $userToUpdate->id
+            $loggedUserRole->type === 'health_unit_administrator' &&
+            $user->id === $userToUpdate->id
         ) {
             return Response::allow();
         }
-        $samuUserRole = (new Role())->where('type', 'samu_user')->first();
+        $samuUserRole = (new Role())->where('type', '=', 'samu_user')->first();
         if (
-            $loggedUserRole->type === 'samu_administrator'
-            && $userToUpdate->role_id === $samuUserRole->id
-        ) {
-            return Response::allow();
-        }
-        if (
-            $loggedUserRole->type === 'samu_administrator'
-            && $user->id === $userToUpdate->id
-        ) {
-            return Response::allow();
-        }
-        $healthUnitAdministratorUserRole = (new Role())->where('type', 'health_unit_administrator')->first();
-        if (
-            $loggedUserRole->type === 'samu_administrator'
-            && $userToUpdate->role_id === $healthUnitAdministratorUserRole->id
+            $loggedUserRole->type === 'samu_administrator' &&
+            $userToUpdate->role_id === $samuUserRole->id
         ) {
             return Response::allow();
         }
         if (
-            $loggedUserRole->type === 'samu_user'
-            && $user->id === $userToUpdate->id
+            $loggedUserRole->type === 'samu_administrator' &&
+            $user->id === $userToUpdate->id
+        ) {
+            return Response::allow();
+        }
+        $healthUnitAdministratorUserRole = (new Role())->where('type', '=', 'health_unit_administrator')->first();
+        if (
+            $loggedUserRole->type === 'samu_administrator' &&
+            $userToUpdate->role_id === $healthUnitAdministratorUserRole->id
         ) {
             return Response::allow();
         }
         if (
-            $loggedUserRole->type === 'health_unit_user'
-            && $user->id === $userToUpdate->id
+            $loggedUserRole->type === 'samu_user' &&
+            $user->id === $userToUpdate->id
+        ) {
+            return Response::allow();
+        }
+        if (
+            $loggedUserRole->type === 'health_unit_user' &&
+            $user->id === $userToUpdate->id
         ) {
             return Response::allow();
         }
@@ -160,10 +160,18 @@ class UserPolicy
     public function delete(User $user, User $userToDelete): Response
     {
         $loggedUserRole = (new Role())->find($user->role_id);
-        $healthUnitUserRole = (new Role())->where('type', 'health_unit_user')->first();
+        $healthUnitUserRole = (new Role())->where('type', '=', 'health_unit_user')->first();
         if (
             $loggedUserRole->type === 'health_unit_administrator'
             && $userToDelete->role_id === $healthUnitUserRole->id
+        ) {
+            return Response::allow();
+        }
+        $healthUnitAdministratorRole = (new Role())->where('type', '=', 'health_unit_administrator')->first();
+        if (
+            $loggedUserRole->type === 'samu_administrator' &&
+            $userToDelete->role_id === $healthUnitAdministratorRole->id &&
+            $userToDelete->created_by === $user->id
         ) {
             return Response::allow();
         }

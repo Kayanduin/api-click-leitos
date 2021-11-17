@@ -105,6 +105,8 @@ class UserService
      */
     public function getAllUsersFromSamuUnit(int $samuUnitId): array|string
     {
+        /** @var User $loggedUser */
+        $loggedUser = auth()->user();
         $resultArray = [];
         $allUsers = User::all();
         if (empty($allUsers->toArray())) {
@@ -121,6 +123,9 @@ class UserService
 
             if (!empty($userUnit)) {
                 if ($userUnit->id === $samuUnitId && $userUnit instanceof SamuUnit) {
+                    $resultArray[] = $userArray;
+                }
+                if ($user->created_by === $loggedUser->id && $userUnit instanceof HealthUnit) {
                     $resultArray[] = $userArray;
                 }
             }
