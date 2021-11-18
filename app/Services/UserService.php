@@ -125,9 +125,6 @@ class UserService
                 if ($userUnit->id === $samuUnitId && $userUnit instanceof SamuUnit) {
                     $resultArray[] = $userArray;
                 }
-                if ($user->created_by === $loggedUser->id && $userUnit instanceof HealthUnit) {
-                    $resultArray[] = $userArray;
-                }
             }
         }
         return $resultArray;

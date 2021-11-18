@@ -370,7 +370,7 @@ class UserController extends Controller
     public function getAllHealthUnitAdminUsersCreatedByLoggedUser(Request $request): Response
     {
         if (
-            $request->user()->cannot('viewHelathUnitAdmin', User::class)
+            $request->user()->cannot('viewHealthUnitAdmin', User::class)
         ) {
             return new Response(['errors' => 'Access denied.'], 403);
         }

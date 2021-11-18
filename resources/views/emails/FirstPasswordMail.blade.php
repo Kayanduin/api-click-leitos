@@ -294,7 +294,7 @@
                                                 style="overflow-wrap:break-word;word-break:break-word;padding:10px;font-family:'Lato',sans-serif;"
                                                 align="left">
                                                 <div align="center">
-                                                    <a href="https://jose-claudivan.github.io/click-leitos-TCC/" target="_blank"
+                                                    <a href="https://jose-claudivan.github.io/click-leitos-TCC/login" target="_blank"
                                                        style="box-sizing: border-box;display: inline-block;font-family:'Lato',sans-serif;text-decoration: none;-webkit-text-size-adjust: none;text-align: center;color: #000000; background-color: #ffffff; border-radius: 10px;-webkit-border-radius: 10px; -moz-border-radius: 10px; width:auto; max-width:100%; overflow-wrap: break-word; word-break: break-word; word-wrap:break-word; mso-border-alt: none; border: solid 3px #006d0b">
                                                         <span style="display:block;padding:10px 30px;line-height:120%;"><span
                                                                     style="font-size: 16px; line-height: 19.2px; font-family: Lato, sans-serif;">Click Leitos</span></span>
