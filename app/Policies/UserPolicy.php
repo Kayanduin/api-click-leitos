@@ -37,6 +37,14 @@ class UserPolicy
             return Response::allow();
         }
 
+        if (
+            $loggedUserRole->type === 'samu_administrator' &&
+            $searchedUser->userRole()->type === 'health_unit_administrator' &&
+            $searchedUser->created_by === $user->id
+        ) {
+            return Response::allow();
+        }
+
         return Response::deny('Access denied.');
     }
 
