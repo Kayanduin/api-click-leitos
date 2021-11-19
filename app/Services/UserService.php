@@ -175,7 +175,6 @@ class UserService
         }
         foreach ($allUsers as $user) {
             if ($user->created_by === $loggedUser->id) {
-                $userUnit = $user->userUnitObject();
                 $userContacts = $user->contacts();
                 $userRole = $user->userRole();
 
@@ -183,7 +182,7 @@ class UserService
                 $userArray['telephone_numbers'] = $userContacts->toArray();
                 $userArray['user_role'] = $userRole->toArray();
 
-                if ($userUnit instanceof HealthUnit) {
+                if ($userRole->type === 'health_unit_administrator') {
                     $resultArray[] = $userArray;
                 }
             }
