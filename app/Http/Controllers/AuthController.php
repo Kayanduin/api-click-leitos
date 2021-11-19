@@ -53,7 +53,7 @@ class AuthController extends Controller
             $requestData,
             [
                 'new_password' => ['required'],
-                'confirm_new_password' => ['required']
+                'confirm_new_password' => ['required', 'same:new_password']
             ]
         );
 
