@@ -22,19 +22,20 @@ class UserPolicy
     {
         $loggedUserRole = (new Role())->find($user->role_id);
         $searchedUser = (new User())->find($searchedUserId);
+        if (is_null($searchedUser->userUnit()) === false) {
+            if (
+                $loggedUserRole->type === 'health_unit_administrator' &&
+                $searchedUser->userUnit()->health_unit_id === $user->userUnit()->health_unit_id
+            ) {
+                return Response::allow();
+            }
 
-        if (
-            $loggedUserRole->type === 'health_unit_administrator' &&
-            $searchedUser->userUnit()->health_unit_id === $user->userUnit()->health_unit_id
-        ) {
-            return Response::allow();
-        }
-
-        if (
-            $loggedUserRole->type === 'samu_administrator' &&
-            $searchedUser->userUnit()->samu_unit_id === $user->userUnit()->samu_unit_id
-        ) {
-            return Response::allow();
+            if (
+                $loggedUserRole->type === 'samu_administrator' &&
+                $searchedUser->userUnit()->samu_unit_id === $user->userUnit()->samu_unit_id
+            ) {
+                return Response::allow();
+            }
         }
 
         if (
@@ -45,7 +46,7 @@ class UserPolicy
             return Response::allow();
         }
 
-        return Response::deny('Access denied.');
+        return Response::deny();
     }
 
     /**
