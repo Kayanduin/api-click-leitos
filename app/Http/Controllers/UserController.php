@@ -144,7 +144,7 @@ class UserController extends Controller
         $validator = Validator::make(
             $requestData,
             [
-                'id' => ['required_without:health_unit_id', 'integer', 'exists:samu_units,id', 'gt:0'],
+                'id' => ['required', 'integer', 'exists:health_units,id', 'gt:0'],
             ]
         );
         if ($validator->fails()) {
