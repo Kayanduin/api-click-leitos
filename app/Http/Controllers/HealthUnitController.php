@@ -142,10 +142,7 @@ class HealthUnitController extends Controller
 
         $healthUnitService = new HealthUnitService();
         $healthUnits = $healthUnitService->getAllHealthUnits();
-        if (is_array($healthUnits)) {
-            return new Response($healthUnits, 200);
-        }
-        return new Response(['message' => 'There is no health unit registered.'], 200);
+        return new Response($healthUnits, 200);
     }
 
     public function deleteHealthUnit(Request $request, int $healthUnitId): Response

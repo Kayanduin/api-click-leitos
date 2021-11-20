@@ -101,12 +101,12 @@ class HealthUnitService
         return $responseArray;
     }
 
-    public function getAllHealthUnits(): ?array
+    public function getAllHealthUnits(): array
     {
         $resultArray = [];
         $healthUnits = HealthUnit::all();
         if (empty($healthUnits->toArray())) {
-            return null;
+            return [];
         }
         foreach ($healthUnits as $healthUnitArrayKey => $healthUnit) {
             $resultArray[$healthUnitArrayKey]['health_unit'] = $healthUnit->toArray();

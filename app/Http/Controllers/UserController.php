@@ -128,10 +128,7 @@ class UserController extends Controller
 
         $userService = new UserService();
         $usersArray = $userService->getAllUsersFromSamuUnit($samuUnitId);
-        if (is_array($usersArray)) {
-            return new Response($usersArray, 200);
-        }
-        return new Response(['message' => 'There is no user registered.'], 200);
+        return new Response($usersArray, 200);
     }
 
     /**
@@ -167,10 +164,7 @@ class UserController extends Controller
 
         $userService = new UserService();
         $usersArray = $userService->getAllUsersFromHealthUnit($healthUnitId);
-        if (is_array($usersArray)) {
-            return new Response($usersArray, 200);
-        }
-        return new Response(['message' => 'There is no user registered.'], 200);
+        return new Response($usersArray, 200);
     }
 
 
@@ -377,9 +371,6 @@ class UserController extends Controller
 
         $userService = new UserService();
         $usersArray = $userService->getAllHealthUnitAdminCreatedByLoggedUser();
-        if (is_array($usersArray)) {
-            return new Response($usersArray, 200);
-        }
-        return new Response(['message' => 'There is no user registered.'], 200);
+        return new Response($usersArray, 200);
     }
 }

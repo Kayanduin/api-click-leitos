@@ -101,16 +101,14 @@ class UserService
     /**
      * Requests all users that are stored in the database.
      * @param int $samuUnitId
-     * @return array|string
+     * @return array
      */
-    public function getAllUsersFromSamuUnit(int $samuUnitId): array|string
+    public function getAllUsersFromSamuUnit(int $samuUnitId): array
     {
-        /** @var User $loggedUser */
-        $loggedUser = auth()->user();
         $resultArray = [];
         $allUsers = User::all();
         if (empty($allUsers->toArray())) {
-            return 'There is no user registered.';
+            return [];
         }
         foreach ($allUsers as $user) {
             $userUnit = $user->userUnitObject();
@@ -133,14 +131,14 @@ class UserService
     /**
      * Requests all users that are stored in the database.
      * @param int $healthUnitId
-     * @return array|string
+     * @return array
      */
-    public function getAllUsersFromHealthUnit(int $healthUnitId): array|string
+    public function getAllUsersFromHealthUnit(int $healthUnitId): array
     {
         $resultArray = [];
         $allUsers = User::all();
         if (empty($allUsers->toArray())) {
-            return 'There is no user registered.';
+            return [];
         }
         foreach ($allUsers as $user) {
             $userUnit = $user->userUnitObject();
@@ -162,16 +160,16 @@ class UserService
 
     /**
      * Requests all users that are stored in the database.
-     * @return array|string
+     * @return array
      */
-    public function getAllHealthUnitAdminCreatedByLoggedUser(): array|string
+    public function getAllHealthUnitAdminCreatedByLoggedUser(): array
     {
         /** @var User $loggedUser */
         $loggedUser = auth()->user();
         $resultArray = [];
         $allUsers = User::all();
         if (empty($allUsers->toArray())) {
-            return 'There is no user registered.';
+            return [];
         }
         foreach ($allUsers as $user) {
             if ($user->created_by === $loggedUser->id) {
