@@ -243,7 +243,7 @@
                                                 <h4
                                                         style="margin: 0px; color: #000000; line-height: 140%; text-align: left; word-wrap: break-word; font-weight: normal; font-family: 'Lato',sans-serif; font-size: 16px;">
                                                     Uma ambulância do SAMU está a caminho, transportando um paciente que
-                                                    <strong>necessitará de um leito {{$details['bed_type']}}</strong>.
+                                                    <strong>necessitará de um leito {{strtolower($details['bed_type'])}}</strong>.
                                                     Por favor, se preparar para receber o paciente.
                                                 </h4>
                                             </td>
