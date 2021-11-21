@@ -8,7 +8,7 @@ Click Leitos is a web application focused on helping and providing a better comm
 
 The Click Leitos web application uses an API that works like a backend interface. In this repository we can find all the API's files. 
 
-## Tecnologies used
+## Technologies used
 
 * PHP 8.0
 * Laravel 8
