@@ -1,4 +1,4 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://user-images.githubusercontent.com/31261531/139511654-40511e31-c33d-4ea0-a1ba-ad3605c0bc69.png" width="200"></a></p>
+<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://github.com/Kayanduin/api-click-leitos/blob/53c3347ca502097a9e2ee82fabe2035f013176f5/resources/images/clickLeitos.png" width="350"></a></p>
 
 ## About Click Leitos
 
