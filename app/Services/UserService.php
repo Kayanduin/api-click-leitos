@@ -275,6 +275,11 @@ class UserService
                 return false;
             }
         }
+        $userUnit = (new UserUnit())->where('user_id', '=', $user->id);
+        $deleteResult = $userUnit->delete();
+        if ($deleteResult === false) {
+            return false;
+        }
         $user->tokens()->delete();
         $user->deactivated_user = true;
         $user->email = $user->id;
