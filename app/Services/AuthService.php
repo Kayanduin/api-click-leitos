@@ -7,9 +7,17 @@ use App\Models\User;
 class AuthService
 {
 
-    public function login(User $user, array $requestData): array
+    /**
+     * Generates an authentication token and returns an array with the token and user information.
+     * @param User $user
+     * @param string $deviceName
+     * @return array An array with the user information and authentication token.
+     */
+    public function generateLoginData(User $user, string $deviceName): array
     {
-        $apiToken = $user->createToken($requestData['device_name'])->plainTextToken;
+        $apiToken = $user
+            ->createToken($deviceName)
+            ->plainTextToken;
 
         $firstTimeLogin = false;
         if ($user->first_time_login === 1) {
@@ -21,16 +29,21 @@ class AuthService
                 'token' => $apiToken,
                 'first_time_login' => $firstTimeLogin,
                 'user_unit' => [],
-                'user_role' => $user->userRole()->toArray()
+                'user_role' => $user
+                    ->userRole()
+                    ->toArray()
             ];
         }
 
         return [
             'token' => $apiToken,
             'first_time_login' => $firstTimeLogin,
-            'user_unit' => $user->userUnitObject()->toArray(),
-            'user_role' => $user->userRole()->toArray()
+            'user_unit' => $user
+                ->userUnitObject()
+                ->toArray(),
+            'user_role' => $user
+                ->userRole()
+                ->toArray()
         ];
     }
-
 }

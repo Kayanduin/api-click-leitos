@@ -26,14 +26,13 @@ class BedController extends Controller
             $errors = $validator->errors();
             return new Response(['errors' => $errors->all()], 400);
         }
-        $bed = (new Bed())->find($bedId);
-        if ($request->user()->cannot('viewById', [Bed::class, $bed])) {
+        if ($request->user()->cannot('viewById', [Bed::class, $bedId])) {
             return new Response(['errors' => 'Access denied.'], 403);
         }
         $bedService = new BedService();
-        $bed = $bedService->getBedById($bedId);
+        $bedData = $bedService->getBedById($bedId);
 
-        return new Response($bed, 200);
+        return new Response($bedData, 200);
     }
 
     /**
@@ -67,9 +66,9 @@ class BedController extends Controller
             return new Response(['errors' => $errors->all()], 400);
         }
         $bedService = new BedService();
-        $beds = $bedService->getBedsByHealthUnit($healthUnitId);
+        $healthUnitBedsData = $bedService->getBedsByHealthUnit($healthUnitId);
 
-        return new Response($beds, 200);
+        return new Response($healthUnitBedsData, 200);
     }
 
     /**
@@ -115,7 +114,11 @@ class BedController extends Controller
         }
 
         $bedService = new BedService();
-        $isBedCreated = $bedService->createBed($validatedData);
+        $isBedCreated = $bedService->createBed(
+            $validatedData['bed_type_id'],
+            $validatedData['total_beds'],
+            $validatedData['health_unit_id']
+        );
 
         if ($isBedCreated) {
             return new Response(['message' => 'Bed created successfully!'], 201);
@@ -160,7 +163,7 @@ class BedController extends Controller
         }
 
         $bedService = new BedService();
-        $isBedUpdated = $bedService->updateBed($validatedData);
+        $isBedUpdated = $bedService->updateBed($validatedData['bed_id'], $validatedData['total_beds']);
 
         if ($isBedUpdated) {
             return new Response(['message' => 'Bed updated successfully!'], 200);
@@ -239,7 +242,7 @@ class BedController extends Controller
         }
 
         $bedService = new BedService();
-        $isBedUpdated = $bedService->increaseFreeBeds($validatedData);
+        $isBedUpdated = $bedService->increaseFreeBeds($validatedData['bed_id'], $validatedData['freed_beds_number']);
         if ($isBedUpdated) {
             return new Response(['message' => 'Free beds increased successfully!'], 200);
         }
@@ -283,7 +286,7 @@ class BedController extends Controller
         }
 
         $bedService = new BedService();
-        $isBedUpdated = $bedService->decreaseFreeBeds($validatedData);
+        $isBedUpdated = $bedService->decreaseFreeBeds($validatedData['bed_id'], $validatedData['occupied_beds_number']);
         if ($isBedUpdated) {
             return new Response(['message' => 'Free beds decreased successfully!'], 200);
         }

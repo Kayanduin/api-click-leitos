@@ -20,11 +20,16 @@ class SamuService
     public function createSamuUnit(array $validatedData): bool
     {
         $addressService = new AddressService();
-        $result = $addressService->createAddress($validatedData);
+        $result = $addressService->createAddress(
+            $validatedData['address'],
+            $validatedData['address_number'],
+            $validatedData['district'],
+            $validatedData['city_id']
+        );
         if (!$result) {
             return false;
         }
-        $address = $addressService->getAddress($validatedData);
+        $address = $addressService->getAddress($validatedData['address']);
         /** @var User $user */
         $user = auth()->user();
         $samuUnit = new SamuUnit([

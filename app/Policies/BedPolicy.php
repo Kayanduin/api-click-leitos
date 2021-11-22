@@ -30,9 +30,10 @@ class BedPolicy
         return Response::deny('Access denied.');
     }
 
-    public function viewById(User $user, Bed $bed)
+    public function viewById(User $user, int $bedId)
     {
         $role = (new Role())->find($user->role_id);
+        $bed = (new Bed())->find($bedId);
         $userUnit = $user->userUnit();
         if ($role->type === 'health_unit_administrator' && $userUnit->health_unit_id === $bed->health_unit_id) {
             return Response::allow();

@@ -37,7 +37,7 @@ class AuthController extends Controller
         }
 
         $authService = new AuthService();
-        $loginData = $authService->login($user, $requestData);
+        $loginData = $authService->generateLoginData($user, $requestData['device_name']);
 
         return new Response($loginData, 200);
     }

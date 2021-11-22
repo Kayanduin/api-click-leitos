@@ -11,33 +11,37 @@ use App\Models\UserUnit;
 class BedService
 {
     /**
-     * @param array $data
-     * @return bool
+     * Persists a health unit bed in the database.
+     * @param int $bedTypeId
+     * @param int $totalBedsNumber
+     * @param int $healthUnitId
+     * @return bool True on success, false on failure.
      */
-    public function createBed(array $data): bool
+    public function createBed(int $bedTypeId, int $totalBedsNumber, int $healthUnitId): bool
     {
         /** @var User $user */
         $user = auth()->user();
 
         $bed = new Bed([
-            'bed_type_id' => $data['bed_type_id'],
-            'total_beds' => $data['total_beds'],
-            'free_beds' => $data['total_beds'],
-            'health_unit_id' => $data['health_unit_id'],
+            'bed_type_id' => $bedTypeId,
+            'total_beds' => $totalBedsNumber,
+            'free_beds' => $totalBedsNumber,
+            'health_unit_id' => $healthUnitId,
             'created_by' => $user->id
         ]);
         return $bed->save();
     }
 
     /**
+     * Retrieves from the database the specified bed by its ID.
      * @param int $bedId
-     * @return array
+     * @return array An array with the bed data.
      */
     public function getBedById(int $bedId): array
     {
         $bed = (new Bed())->find($bedId);
-        $bedType = (new BedType())->find($bed->getAttribute('bed_type_id'));
-        $healthUnit = (new HealthUnit())->find($bed->getAttribute('health_unit_id'));
+        $bedType = (new BedType())->find($bed->bed_type_id);
+        $healthUnit = (new HealthUnit())->find($bed->health_unit_id);
         return [
             'bed' => $bed->toArray(),
             'bed_type' => $bedType->toArray(),
@@ -46,53 +50,61 @@ class BedService
     }
 
     /**
+     * Returns all beds that belongs to a specified Health Unit
      * @param int $healthUnitId
-     * @return array
+     * @return array An array with the bed and health unit data.
      */
     public function getBedsByHealthUnit(int $healthUnitId): array
     {
         $resultArray = [];
-        $beds = (new Bed())->where('health_unit_id', $healthUnitId)->get();
+        $beds = (new Bed())
+            ->where('health_unit_id', '=', $healthUnitId)
+            ->get();
         foreach ($beds as $key => $bed) {
             $resultArray[$key]['bed'] = $bed->toArray();
-            $resultArray[$key]['bed_type'] = (new BedType())->find($bed->getAttribute('bed_type_id'));
+            $resultArray[$key]['bed_type'] = (new BedType())->find($bed->bed_type_id);
             $resultArray[$key]['health_unit'] = (new HealthUnit())->find($healthUnitId);
         }
         return $resultArray;
     }
 
     /**
-     * @param array $data
-     * @return bool
+     * Updates a registered bed.
+     * @param int $bedId
+     * @param int $newTotalBedsNumber
+     * @return bool True on success, false on failure.
      */
-    public function updateBed(array $data): bool
+    public function updateBed(int $bedId, int $newTotalBedsNumber): bool
     {
-        $bed = (new Bed())->find($data['bed_id']);
-        $bed->total_beds = $data['total_beds'];
-        if ($data['total_beds'] < $bed->free_beds) {
-            $bed->free_beds = $data['total_beds'];
+        $bed = (new Bed())->find($bedId);
+        $bed->total_beds = $newTotalBedsNumber;
+        if ($newTotalBedsNumber < $bed->free_beds) {
+            $bed->free_beds = $newTotalBedsNumber;
         }
         return $bed->save();
     }
 
     /**
+     * Deletes a registered bed from database.
      * @param int $bedId
-     * @return bool|null
+     * @return bool True on success, false on failure.
      */
-    public function deleteBed(int $bedId): ?bool
+    public function deleteBed(int $bedId): bool
     {
         $bed = (new Bed())->find($bedId);
         return $bed->delete();
     }
 
     /**
-     * @param array $data
-     * @return bool
+     * Increase the number of free beds by bed ID.
+     * @param int $bedId
+     * @param int $freedBedsNumber
+     * @return bool True on success, false on failure.
      */
-    public function increaseFreeBeds(array $data): bool
+    public function increaseFreeBeds(int $bedId, int $freedBedsNumber): bool
     {
-        $bed = (new Bed())->find($data['bed_id']);
-        $updatedFreeBedsAmount = $bed->free_beds + $data['freed_beds_number'];
+        $bed = (new Bed())->find($bedId);
+        $updatedFreeBedsAmount = $bed->free_beds + $freedBedsNumber;
         if ($updatedFreeBedsAmount > $bed->total_beds) {
             return false;
         }
@@ -101,30 +113,20 @@ class BedService
         if ($saveResult === false) {
             return false;
         }
-        $mailService = new MailService();
-        $userUnitAttachedToSamuUnit = (new UserUnit())->whereNotNull('samu_unit_id')->get();
-        foreach ($userUnitAttachedToSamuUnit as $userUnit) {
-            $user = (new User())->find($userUnit->user_id);
-            $mailService->sendFreeBedNumberUpdateMail(
-                $user->email,
-                'liberado',
-                $bed->getBedHealthUnit()->name,
-                $bed->getBedType(),
-                $bed->total_beds,
-                $bed->free_beds
-            );
-        }
+        $this->notifyUpdatedBedToSamuUnitUsers('liberado', $bed);
         return true;
     }
 
     /**
-     * @param array $data
-     * @return bool
+     * Decrease the number of free beds by bed ID.
+     * @param int $bedId
+     * @param int $occupiedBedsNumber
+     * @return bool True on success, false on failure.
      */
-    public function decreaseFreeBeds(array $data): bool
+    public function decreaseFreeBeds(int $bedId, int $occupiedBedsNumber): bool
     {
-        $bed = (new Bed())->find($data['bed_id']);
-        $updatedFreeBedsAmount = $bed->free_beds - $data['occupied_beds_number'];
+        $bed = (new Bed())->find($bedId);
+        $updatedFreeBedsAmount = $bed->free_beds - $occupiedBedsNumber;
         if ($updatedFreeBedsAmount < 0) {
             return false;
         }
@@ -133,38 +135,63 @@ class BedService
         if ($saveResult === false) {
             return false;
         }
+        $this->notifyUpdatedBedToSamuUnitUsers('ocupado', $bed);
+        return true;
+    }
+
+    /**
+     * Returns an array with all registered bed types.
+     * @return array An array with all registered bed types.
+     */
+    public function getBedTypes(): array
+    {
+        return (new BedType())
+            ->get()
+            ->toArray();
+    }
+
+    /**
+     * Sends an email to all users of the Health Unit that holds the specified bed. The email informs that an ambulance
+     * is on its way to the Health Unit and will need one bed of this type.
+     * @param int $bedId
+     */
+    public function notifyBedManagers(int $bedId): void
+    {
         $mailService = new MailService();
-        $userUnitAttachedToSamuUnit = (new UserUnit())->whereNotNull('samu_unit_id')->get();
+        $bed = (new Bed())->find($bedId);
+        $userUnitAttachedToBedHealthUnit = (new UserUnit())
+            ->where('health_unit_id', '=', $bed->health_unit_id)
+            ->get();
+        foreach ($userUnitAttachedToBedHealthUnit as $userUnit) {
+            $user = (new User())->find($userUnit->user_id);
+            $mailService->sendBedManagersNotificationMail(
+                $user->email,
+                $bed->getBedType()
+            );
+        }
+    }
+
+    /**
+     * Sends an email to all users of all Samu Units. The email informs that a bed were updated (freed or occupied).
+     * @param string $typeOfActionDone
+     * @param Bed $bed
+     */
+    private function notifyUpdatedBedToSamuUnitUsers(string $typeOfActionDone, Bed $bed): void
+    {
+        $mailService = new MailService();
+        $userUnitAttachedToSamuUnit = (new UserUnit())
+            ->whereNotNull('samu_unit_id')
+            ->get();
         foreach ($userUnitAttachedToSamuUnit as $userUnit) {
             $user = (new User())->find($userUnit->user_id);
             $mailService->sendFreeBedNumberUpdateMail(
                 $user->email,
-                'ocupado',
+                $typeOfActionDone,
                 $bed->getBedHealthUnit()->name,
                 $bed->getBedType(),
                 $bed->total_beds,
                 $bed->free_beds
             );
-        }
-        return true;
-    }
-
-    /**
-     * @return array
-     */
-    public function getBedTypes(): array
-    {
-        return (new BedType())->get()->toArray();
-    }
-
-    public function notifyBedManagers(int $bedId): void
-    {
-        $mailService = new MailService();
-        $bed = (new Bed())->find($bedId);
-        $userUnitAttachedToBedHealthUnit = (new UserUnit())->where('health_unit_id', $bed->health_unit_id)->get();
-        foreach ($userUnitAttachedToBedHealthUnit as $userUnit) {
-            $user = (new User())->find($userUnit->user_id);
-            $mailService->sendBedManagersNotificationMail($user->email, $bed->getBedType());
         }
     }
 }

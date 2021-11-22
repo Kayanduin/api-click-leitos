@@ -48,7 +48,14 @@ class HealthUnitController extends Controller
             return new Response(['errors' => $exception->getMessage()], 500);
         }
         $healthUnitService = new HealthUnitService();
-        $isHealthUnitCreated = $healthUnitService->createHealthUnit($validatedData);
+        $isHealthUnitCreated = $healthUnitService->createHealthUnit(
+            $validatedData['name'],
+            $validatedData['address'],
+            $validatedData['address_number'],
+            $validatedData['district'],
+            $validatedData['city_id'],
+            $validatedData['telephone_numbers']
+        );
 
         if (!$isHealthUnitCreated) {
             return new Response(['errors' => 'Error! The health unit could not be created.'], 500);
@@ -101,8 +108,20 @@ class HealthUnitController extends Controller
             return new Response(['errors' => 'Access denied.'], 403);
         }
 
+        $updatedAddressData = [
+            'address' => $validatedData['address'],
+            'address_number' => $validatedData['address_number'],
+            'district' => $validatedData['district'],
+            'city_id' => $validatedData['city_id']
+        ];
+
         $healthUnitService = new HealthUnitService();
-        $isHealthUnitUpdated = $healthUnitService->updateHealthUnit($validatedData);
+        $isHealthUnitUpdated = $healthUnitService->updateHealthUnit(
+            $validatedData['healthUnitId'],
+            $validatedData['name'],
+            $updatedAddressData,
+            $validatedData['telephone_numbers']
+        );
 
         if (!$isHealthUnitUpdated) {
             return new Response(['errors' => 'Error! The health unit could not be updated.'], 500);
