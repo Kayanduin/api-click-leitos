@@ -88,17 +88,30 @@ class UserController extends Controller
                 $requestData['health_unit_id'] = null;
             }
         }
-
         $userService = new UserService();
-        $createUserResult = $userService->createUser(
-            $requestData['name'],
-            $requestData['email'],
-            $requestData['cpf'],
-            $requestData['user_role_id'],
-            $requestData['telephone_numbers'],
-            $requestData['health_unit_id'],
-            $requestData['samu_unit_id']
-        );
+
+        if (
+            array_key_exists('samu_unit_id', $requestData) === false &&
+            array_key_exists('health_unit_id', $requestData) === false
+        ) {
+            $createUserResult = $userService->createUser(
+                $requestData['name'],
+                $requestData['email'],
+                $requestData['cpf'],
+                $requestData['user_role_id'],
+                $requestData['telephone_numbers']
+            );
+        } else {
+            $createUserResult = $userService->createUser(
+                $requestData['name'],
+                $requestData['email'],
+                $requestData['cpf'],
+                $requestData['user_role_id'],
+                $requestData['telephone_numbers'],
+                $requestData['health_unit_id'],
+                $requestData['samu_unit_id']
+            );
+        }
         if (!$createUserResult) {
             return new Response(['errors' => 'Error! The user could not be created.'], 500);
         }
