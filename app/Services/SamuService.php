@@ -14,26 +14,38 @@ class SamuService
 {
 
     /**
-     * @param array $validatedData
-     * @return bool
+     * Persists a SAMU Unit into the database.
+     * @param string $name
+     * @param string $address
+     * @param int $addressNumber
+     * @param string $district
+     * @param int $cityId
+     * @param array $telephoneNumbers
+     * @return bool True on success, false on failure.
      */
-    public function createSamuUnit(array $validatedData): bool
-    {
+    public function createSamuUnit(
+        string $name,
+        string $address,
+        int $addressNumber,
+        string $district,
+        int $cityId,
+        array $telephoneNumbers
+    ): bool {
         $addressService = new AddressService();
         $result = $addressService->createAddress(
-            $validatedData['address'],
-            $validatedData['address_number'],
-            $validatedData['district'],
-            $validatedData['city_id']
+            $address,
+            $addressNumber,
+            $district,
+            $cityId
         );
         if (!$result) {
             return false;
         }
-        $address = $addressService->getAddress($validatedData['address']);
+        $address = $addressService->getAddress($address);
         /** @var User $user */
         $user = auth()->user();
         $samuUnit = new SamuUnit([
-            'name' => $validatedData['name'],
+            'name' => $name,
             'address_id' => $address->id,
             'created_by' => $user->id
         ]);
@@ -42,7 +54,7 @@ class SamuService
             $address->delete();
             return false;
         }
-        foreach ($validatedData['telephone_numbers'] as $telephoneNumber) {
+        foreach ($telephoneNumbers as $telephoneNumber) {
             $healthUnitContact = new SamuUnitContact([
                 'samu_unit_id' => $samuUnit->id,
                 'telephone_number' => $telephoneNumber,
@@ -65,32 +77,56 @@ class SamuService
         return true;
     }
 
+    /**
+     * Returns an array with data from a specified SAMU Unit.
+     * @param int $samuUnitId
+     * @return array An array with data of the SAMU Unit.
+     */
     public function getSamuUnit(int $samuUnitId): array
     {
-        $responseArray['health_unit'] = (new SamuUnit())->find($samuUnitId)->toArray();
-        $responseArray['address'] = (new Address())
-            ->find(
-                $responseArray['health_unit']['address_id']
-            )->toArray();
-        $responseArray['city'] = (new City())->find($responseArray['address']['city_id'])->toArray();
-        $responseArray['state'] = (new State())->find($responseArray['city']['state_id'])->toArray();
-        $healthUnitContacts = (new SamuUnitContact())->where('samu_unit_id', $samuUnitId)->get();
-        $responseArray['telephone_numbers'] = $healthUnitContacts->toArray();
-        return $responseArray;
+        $samuUnit = (new SamuUnit())
+            ->find($samuUnitId)
+            ->toArray();
+        $address = (new Address())
+            ->find($samuUnit['address_id'])
+            ->toArray();
+        $city = (new City())
+            ->find($address['city_id'])
+            ->toArray();
+        $state = (new State())
+            ->find($city['state_id'])
+            ->toArray();
+        $samuUnitContacts = (new SamuUnitContact())
+            ->where('samu_unit_id', '=', $samuUnitId)
+            ->get()
+            ->toArray();
+        return [
+            'health_unit' => $samuUnit,
+            'address' => $address,
+            'city' => $city,
+            'state' => $state,
+            'telephone_numbers' => $samuUnitContacts
+        ];
     }
 
-    public function updateSamuUnit(array $validatedData): bool
+    /**
+     * Updates a registered SAMU Unit.
+     * @param int $samuUnitId
+     * @param array $updatedData
+     * @return bool True on success, false on failure.
+     */
+    public function updateSamuUnit(int $samuUnitId, array $updatedData): bool
     {
-        $healthUnit = (new SamuUnit())->find($validatedData['samu_unit_id']);
         $addressService = new AddressService();
-        $addressUpdateResult = $addressService->updateAddress($healthUnit->address_id, $validatedData);
-        if (!$addressUpdateResult) {
+        $samuUnit = (new SamuUnit())->find($samuUnitId);
+        $addressUpdateResult = $addressService->updateAddress($samuUnit->address_id, $updatedData);
+        if ($addressUpdateResult === false) {
             return false;
         }
-        foreach ($validatedData as $key => $value) {
+        foreach ($updatedData as $key => $value) {
             switch ($key) {
                 case 'name':
-                    $healthUnit->name = $value;
+                    $samuUnit->name = $value;
                     break;
                 case 'telephone_numbers':
                     foreach ($value as $updatedContact) {
@@ -106,13 +142,20 @@ class SamuService
                     break;
             }
         }
-        return $healthUnit->save();
+        return $samuUnit->save();
     }
 
+    /**
+     * Deletes a specified SAMU Unit from database.
+     * @param int $samuUnitId
+     * @return bool True on success, false on failure.
+     */
     public function deleteSamuUnit(int $samuUnitId): bool
     {
-        $usersAttachedToThisSamuUnit = (new UserUnit())->where('samu_unit_id', '=', $samuUnitId)->get();
         $userService = new UserService();
+        $usersAttachedToThisSamuUnit = (new UserUnit())
+            ->where('samu_unit_id', '=', $samuUnitId)
+            ->get();
         foreach ($usersAttachedToThisSamuUnit as $user) {
             $deleteResult = $userService->deleteUser($user->id);
             if ($deleteResult === false) {
@@ -121,7 +164,9 @@ class SamuService
         }
 
         $samuUnit = (new SamuUnit())->find($samuUnitId);
-        $samuUnitContacts = (new SamuUnitContact())->where('samu_unit_id', $samuUnitId)->get();
+        $samuUnitContacts = (new SamuUnitContact())
+            ->where('samu_unit_id', '=', $samuUnitId)
+            ->get();
         foreach ($samuUnitContacts as $contact) {
             $deleteResult = $contact->delete();
             if ($deleteResult === false) {

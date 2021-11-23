@@ -43,7 +43,14 @@ class SamuController extends Controller
         }
 
         $samuService = new SamuService();
-        $isSamuUnitCreated = $samuService->createSamuUnit($validatedData);
+        $isSamuUnitCreated = $samuService->createSamuUnit(
+            $validatedData['name'],
+            $validatedData['address'],
+            $validatedData['address_number'],
+            $validatedData['district'],
+            $validatedData['city_id'],
+            $validatedData['telephone_numbers']
+        );
 
         if (!$isSamuUnitCreated) {
             return new Response(['errors' => 'Error! The samu unit could not be created.'], 500);
@@ -114,9 +121,8 @@ class SamuController extends Controller
         if ($request->user()->cannot('update', [SamuUnit::class, $id])) {
             return new Response(['errors' => 'Access denied.'], 403);
         }
-
         $samuService = new SamuService();
-        $isSamuUnitUpdated = $samuService->updateSamuUnit($validatedData);
+        $isSamuUnitUpdated = $samuService->updateSamuUnit($validatedData['samu_unit_id'], $validatedData);
 
         if (!$isSamuUnitUpdated) {
             return new Response(['errors' => 'Error! The samu unit could not be updated.'], 500);

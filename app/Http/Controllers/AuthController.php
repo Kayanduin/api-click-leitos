@@ -68,7 +68,7 @@ class AuthController extends Controller
         }
 
         $userService = new UserService();
-        $isPasswordReseted = $userService->resetPassword($validatedData);
+        $isPasswordReseted = $userService->resetPassword($validatedData['new_password']);
 
         if (!$isPasswordReseted) {
             return new Response(['errors' => 'Could not reset the password.'], 400);

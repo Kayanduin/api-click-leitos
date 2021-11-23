@@ -60,10 +60,7 @@ class UserController extends Controller
         }
 
         if (
-            $request->user()->cannot(
-                'create',
-                [User::class, $requestData['user_role_id']]
-            )
+            $request->user()->cannot('create', [User::class, $requestData['user_role_id']])
         ) {
             return new Response(['errors' => 'Access denied.'], 403);
         }
@@ -76,6 +73,9 @@ class UserController extends Controller
             ) {
                 return new Response(['errors' => 'A Health Unit user must have a valid health_unit_id.'], 400);
             }
+            if (array_key_exists('health_unit_id', $requestData)) {
+                $requestData['samu_unit_id'] = null;
+            }
         }
         if ($userRole->type === 'samu_user') {
             if (
@@ -84,11 +84,22 @@ class UserController extends Controller
             ) {
                 return new Response(['errors' => 'A Samu Unit user must have a valid samu_unit_id.'], 400);
             }
+            if (array_key_exists('samu_unit_id', $requestData)) {
+                $requestData['health_unit_id'] = null;
+            }
         }
 
         $userService = new UserService();
-
-        if (!$userService->createUser($requestData)) {
+        $createUserResult = $userService->createUser(
+            $requestData['name'],
+            $requestData['email'],
+            $requestData['cpf'],
+            $requestData['user_role_id'],
+            $requestData['telephone_numbers'],
+            $requestData['health_unit_id'],
+            $requestData['samu_unit_id']
+        );
+        if (!$createUserResult) {
             return new Response(['errors' => 'Error! The user could not be created.'], 500);
         }
 
@@ -353,8 +364,16 @@ class UserController extends Controller
         $requestData['user_role_id'] = 1;
 
         $userService = new UserService();
+        $createUserResult = $userService->createUser(
+            $requestData['name'],
+            $requestData['email'],
+            $requestData['cpf'],
+            $requestData['user_role_id'],
+            $requestData['telephone_numbers']
+        );
 
-        if (!$userService->createUser($requestData)) {
+
+        if (!$createUserResult) {
             return new Response(['errors' => 'Error! The user could not be created.'], 500);
         }
 

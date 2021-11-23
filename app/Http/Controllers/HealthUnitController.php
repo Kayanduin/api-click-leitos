@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\HealthUnit;
 use App\Models\HealthUnitContact;
-use App\Models\UserUnit;
 use App\Services\HealthUnitService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -108,20 +107,8 @@ class HealthUnitController extends Controller
             return new Response(['errors' => 'Access denied.'], 403);
         }
 
-        $updatedAddressData = [
-            'address' => $validatedData['address'],
-            'address_number' => $validatedData['address_number'],
-            'district' => $validatedData['district'],
-            'city_id' => $validatedData['city_id']
-        ];
-
         $healthUnitService = new HealthUnitService();
-        $isHealthUnitUpdated = $healthUnitService->updateHealthUnit(
-            $validatedData['healthUnitId'],
-            $validatedData['name'],
-            $updatedAddressData,
-            $validatedData['telephone_numbers']
-        );
+        $isHealthUnitUpdated = $healthUnitService->updateHealthUnit($validatedData['healthUnitId'], $validatedData);
 
         if (!$isHealthUnitUpdated) {
             return new Response(['errors' => 'Error! The health unit could not be updated.'], 500);

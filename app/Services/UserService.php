@@ -10,45 +10,58 @@ use App\Models\UserContact;
 use App\Models\UserUnit;
 use Illuminate\Support\Facades\Hash;
 
+const FIRST_USER_ID = 1;
+
 class UserService
 {
     /**
-     * Validates the data, persist the user, and it's contacts in the database.
-     * @param array $newUserData
-     * @return string
+     * Persist the user and its contacts in the database.
+     * @param string $name
+     * @param string $email
+     * @param string $cpf
+     * @param int $userRoleId
+     * @param array $telephoneNumbers
+     * @param int|null $healthUnitId
+     * @param int|null $samuUnitId
+     * @return bool True on success, false on failure.
      */
-    public function createUser(array $newUserData): string
-    {
-        $token = 'QyQ_%$ypZeLs54b4Vsz536&Ykc6Wp=vsLA#Z7=6dNwt*!VRXeVua#bm8R^zQV7hBLC8v&FrrEmF8xw8SLD&KRw%7+6$%%j95ExCk';
-        $firstPassword = Hash::make($token);
-        $sanitizedFirstPassword = preg_replace('/^\$2y\$10\$/', '', $firstPassword);
-        $createdById = 1;
+    public function createUser(
+        string $name,
+        string $email,
+        string $cpf,
+        int $userRoleId,
+        array $telephoneNumbers,
+        int $healthUnitId = null,
+        int $samuUnitId = null
+    ): bool {
+        $firstPassword = $this->generateUserFirstPassword();
+        $userIdForCreatedByField = FIRST_USER_ID;
         if ((new User())->exists()) {
             /** @var User $user */
             $user = auth()->user();
-            $createdById = $user->id;
+            $userIdForCreatedByField = $user->id;
         }
 
         $user = new User([
-            'name' => $newUserData['name'],
-            'email' => $newUserData['email'],
-            'password' => Hash::make($sanitizedFirstPassword, ['rounds' => 15]),
-            'cpf' => $newUserData['cpf'],
+            'name' => $name,
+            'email' => $email,
+            'password' => Hash::make($firstPassword, ['rounds' => 15]),
+            'cpf' => $cpf,
             'first_time_login' => 1,
-            'role_id' => $newUserData['user_role_id'],
+            'role_id' => $userRoleId,
             'deactivated_user' => false,
-            'created_by' => $createdById
+            'created_by' => $userIdForCreatedByField
         ]);
         $saveResult = $user->save();
         if ($saveResult === false) {
             return false;
         }
-        $userId = $user->getAttribute('id');
-        foreach ($newUserData['telephone_numbers'] as $telephoneNumber) {
+        $userId = $user->id;
+        foreach ($telephoneNumbers as $telephoneNumber) {
             $contact = new UserContact([
                 'user_id' => $userId,
                 'telephone_number' => $telephoneNumber,
-                'created_by' => $createdById
+                'created_by' => $userIdForCreatedByField
             ]);
             $saveResult = $contact->save();
             if ($saveResult === false) {
@@ -57,12 +70,12 @@ class UserService
             }
         }
 
-        if (array_key_exists('health_unit_id', $newUserData)) {
+        if ($healthUnitId) {
             $userUnit = new UserUnit([
                 'user_id' => $userId,
                 'samu_unit_id' => null,
-                'health_unit_id' => $newUserData['health_unit_id'],
-                'created_by' => $createdById
+                'health_unit_id' => $healthUnitId,
+                'created_by' => $userIdForCreatedByField
             ]);
             $saveResult = $userUnit->save();
             if ($saveResult === false) {
@@ -75,12 +88,12 @@ class UserService
             }
         }
 
-        if (array_key_exists('samu_unit_id', $newUserData)) {
+        if ($samuUnitId) {
             $userUnit = new UserUnit([
                 'user_id' => $userId,
-                'samu_unit_id' => $newUserData['samu_unit_id'],
+                'samu_unit_id' => $samuUnitId,
                 'health_unit_id' => null,
-                'created_by' => $createdById
+                'created_by' => $userIdForCreatedByField
             ]);
             $saveResult = $userUnit->save();
             if ($saveResult === false) {
@@ -94,14 +107,14 @@ class UserService
         }
 
         $mailService = new MailService();
-        $mailService->sendFirstPasswordMail($sanitizedFirstPassword, $user->email, $user->name);
+        $mailService->sendFirstPasswordMail($firstPassword, $user->email, $user->name);
         return true;
     }
 
     /**
-     * Requests all users that are stored in the database.
+     * Returns all users of a specific SAMU Unit that are registered in the database.
      * @param int $samuUnitId
-     * @return array
+     * @return array An array with data from found users in the database.
      */
     public function getAllUsersFromSamuUnit(int $samuUnitId): array
     {
@@ -119,19 +132,17 @@ class UserService
             $userArray['telephone_numbers'] = $userContacts->toArray();
             $userArray['user_role'] = $userRole->toArray();
 
-            if (!empty($userUnit)) {
-                if ($userUnit->id === $samuUnitId && $userUnit instanceof SamuUnit) {
-                    $resultArray[] = $userArray;
-                }
+            if ($userUnit instanceof SamuUnit && $userUnit->id === $samuUnitId) {
+                $resultArray[] = $userArray;
             }
         }
         return $resultArray;
     }
 
     /**
-     * Requests all users that are stored in the database.
+     * Returns all users of a specific Health Unit that are registered in the database.
      * @param int $healthUnitId
-     * @return array
+     * @return array An array with data from found users in the database.
      */
     public function getAllUsersFromHealthUnit(int $healthUnitId): array
     {
@@ -149,18 +160,17 @@ class UserService
             $userArray['telephone_numbers'] = $userContacts->toArray();
             $userArray['user_role'] = $userRole->toArray();
 
-            if (!empty($userUnit)) {
-                if ($userUnit->id === $healthUnitId && $userUnit instanceof HealthUnit) {
-                    $resultArray[] = $userArray;
-                }
+
+            if ($userUnit instanceof HealthUnit && $userUnit->id === $healthUnitId) {
+                $resultArray[] = $userArray;
             }
         }
         return $resultArray;
     }
 
     /**
-     * Requests all users that are stored in the database.
-     * @return array
+     * Returns all Health Unit administrators created by the logged user.
+     * @return array An array with data from all found users.
      */
     public function getAllHealthUnitAdminCreatedByLoggedUser(): array
     {
@@ -173,14 +183,14 @@ class UserService
         }
         foreach ($allUsers as $user) {
             if ($user->created_by === $loggedUser->id) {
-                $userContacts = $user->contacts();
                 $userRole = $user->userRole();
 
-                $userArray = $user->toArray();
-                $userArray['telephone_numbers'] = $userContacts->toArray();
-                $userArray['user_role'] = $userRole->toArray();
-
                 if ($userRole->type === 'health_unit_administrator') {
+                    $userContacts = $user->contacts();
+                    $userArray = $user->toArray();
+                    $userArray['telephone_numbers'] = $userContacts->toArray();
+                    $userArray['user_role'] = $userRole->toArray();
+
                     $resultArray[] = $userArray;
                 }
             }
@@ -188,12 +198,16 @@ class UserService
         return $resultArray;
     }
 
-    public function getAllUsers(): array|string
+    /**
+     * Returns all users registered in the database.
+     * @return array An array with data from all users.
+     */
+    public function getAllUsers(): array
     {
         $resultArray = [];
         $allUsers = User::all();
         if (empty($allUsers->toArray())) {
-            return 'There is no user registered.';
+            return [];
         }
         foreach ($allUsers as $user) {
             $userContacts = $user->contacts();
@@ -209,29 +223,31 @@ class UserService
     }
 
     /**
-     * Gets a specific user matching it's given ID.
+     * Gets a specific user matching its given ID.
      * @param int $id
-     * @return array
+     * @return array An array with the data of the found user.
      */
     public function getUser(int $id): array
     {
-        $user = User::find($id);
-        $userArray = $user->toArray();
-        $userContacts = UserContact::where('user_id', $id)->get();
-        $userContactsArray = $userContacts->toArray();
-        $userArray['telephone_numbers'] = $userContactsArray;
-        return $userArray;
+        $user = (new User())->find($id);
+        $resultArray = $user->toArray();
+        $userContactsArray = (new UserContact())
+            ->where('user_id', '=', $id)
+            ->get()
+            ->toArray();
+        $resultArray['telephone_numbers'] = $userContactsArray;
+        return $resultArray;
     }
 
     /**
-     * Validates the data, gets a specific user matching it's given ID and update him.
+     * Updates a user model by specified user id.
      * @param array $updatedUserData
-     * @param $userId
-     * @return bool
+     * @param int $userId
+     * @return bool True on success, false on failure.
      */
-    public function updateUser(array $updatedUserData, $userId): bool
+    public function updateUser(array $updatedUserData, int $userId): bool
     {
-        $user = User::find($userId);
+        $user = (new User())->find($userId);
         foreach ($updatedUserData as $key => $value) {
             switch ($key) {
                 case 'name':
@@ -261,14 +277,14 @@ class UserService
     }
 
     /**
-     * Deletes a specific user, and it's contacts from the database.
-     * @param int $id
-     * @return bool
+     * Deletes a specific user, and its contacts from the database.
+     * @param int $userId
+     * @return bool True on success, false on failure.
      */
-    public function deleteUser(int $id): bool
+    public function deleteUser(int $userId): bool
     {
-        $user = User::find($id);
-        $userContacts = UserContact::where('user_id', $id)->get();
+        $user = (new User())->find($userId);
+        $userContacts = (new UserContact())->where('user_id', '=', $userId)->get();
         foreach ($userContacts as $contact) {
             $deleteResult = $contact->delete();
             if ($deleteResult === false) {
@@ -288,14 +304,15 @@ class UserService
     }
 
     /**
-     * @param array $data
-     * @return bool
+     * Changes the user password.
+     * @param string $newPassword
+     * @return bool True on success, false on failure.
      */
-    public function resetPassword(array $data): bool
+    public function resetPassword(string $newPassword): bool
     {
         /** @var User $user */
         $user = auth()->user();
-        $user->password = Hash::make($data['new_password'], ['rounds' => 15]);
+        $user->password = Hash::make($newPassword, ['rounds' => 15]);
         $user->first_time_login = 0;
         $isUserSaved = $user->save();
         if ($isUserSaved) {
@@ -307,10 +324,26 @@ class UserService
     }
 
     /**
+     * Returns an array with all user roles.
      * @return array
      */
     public function getRoles(): array
     {
-        return (new Role())->get()->toArray();
+        return (new Role())
+            ->get()
+            ->toArray();
+    }
+
+    /**
+     * Generates a password for the user login in the application for the first time. The password is a hashed token
+     * without the metadata of the hash.
+     * @return string A password.
+     */
+    private function generateUserFirstPassword(): string
+    {
+        $firstPasswordToken =
+            'QyQ_%$ypZeLs54b4Vsz536&Ykc6Wp=vsLA#Z7=6dNwt*!VRXeVua#bm8R^zQV7hBLC8v&FrrEmF8xw8SLD&KRw%7+6$%%j95ExCk';
+        $firstPassword = Hash::make($firstPasswordToken);
+        return preg_replace('/^\$2y\$10\$/', '', $firstPassword);
     }
 }

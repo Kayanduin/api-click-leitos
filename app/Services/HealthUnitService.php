@@ -81,39 +81,34 @@ class HealthUnitService
     /**
      * Updates a registered Health Unit.
      * @param int $healthUnitId
-     * @param string|null $updatedName
-     * @param array|null $updateAddressData
-     * @param array|null $updatedTelephoneNumbers
+     * @param array $updatedData
      * @return bool True on success, false on failure.
      */
-    public function updateHealthUnit(
-        int $healthUnitId,
-        string $updatedName = null,
-        array $updateAddressData = null,
-        array $updatedTelephoneNumbers = null
-    ): bool {
+    public function updateHealthUnit(int $healthUnitId, array $updatedData): bool
+    {
+        $addressService = new AddressService();
         $healthUnit = (new HealthUnit())->find($healthUnitId);
-        if ($updatedName) {
-            $healthUnit->name = $updatedName;
+        $addressUpdateResult = $addressService->updateAddress($healthUnit->address_id, $updatedData);
+        if ($addressUpdateResult === false) {
+            return false;
         }
-        if ($updateAddressData) {
-            $addressService = new AddressService();
-            $addressUpdateResult = $addressService->updateAddress(
-                $healthUnit->address_id,
-                $updateAddressData
-            );
-            if ($addressUpdateResult === false) {
-                return false;
-            }
-        }
-        if ($updatedTelephoneNumbers) {
-            foreach ($updatedTelephoneNumbers as $updatedTelephoneNumber) {
-                $contact = (new HealthUnitContact())->find($updatedTelephoneNumber['id']);
-                $contact->telephone_number = $updatedTelephoneNumber['telephone_number'];
-                $saveResult = $contact->save();
-                if ($saveResult === false) {
-                    return false;
-                }
+        foreach ($updatedData as $key => $value) {
+            switch ($key) {
+                case 'name':
+                    $healthUnit->name = $value;
+                    break;
+                case 'telephone_numbers':
+                    foreach ($value as $updatedContact) {
+                        $contact = (new HealthUnitContact())->find($updatedContact['id']);
+                        $contact->telephone_number = $updatedContact['telephone_number'];
+                        $saveResult = $contact->save();
+                        if ($saveResult === false) {
+                            return false;
+                        }
+                    }
+                    break;
+                default:
+                    break;
             }
         }
         return $healthUnit->save();
@@ -236,8 +231,7 @@ class HealthUnitService
                 return false;
             }
         }
-        $healthUnitAddress = (new Address())
-            ->find($healthUnit->address_id);
+        $healthUnitAddress = (new Address())->find($healthUnit->address_id);
 
         $deleteResult = $healthUnitAddress->delete();
         if ($deleteResult === false) {
@@ -248,7 +242,7 @@ class HealthUnitService
 
     /**
      * Returns an array with data from all registered Health Units.
-     * @return array
+     * @return array An array with data from all registered Health Units.
      */
     public function getAllHealthUnitsWithBeds(): array
     {
