@@ -19,7 +19,7 @@ class FirstUser
     public function handle(Request $request, Closure $next)
     {
         $userService = new UserService();
-        if (is_array($userService->getAllUsers())) {
+        if (!empty($userService->getAllUsers())) {
             return new Response(['message' => 'Access denied.'], 403);
         }
         return $next($request);
