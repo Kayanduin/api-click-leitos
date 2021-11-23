@@ -53,12 +53,8 @@ class BedController extends Controller
                     'required',
                     'integer',
                     'exists:health_units,id',
-                    'exists:beds,health_unit_id',
                     'gt:0'
                 ]
-            ],
-            [
-                'health_unit_id.exists' => 'This health unit does not have registered beds.'
             ]
         );
         if ($validator->fails()) {
