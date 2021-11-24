@@ -250,6 +250,7 @@ class HealthUnitService
         $keysToUnset = [];
         $healthUnits = (new HealthUnit())->get();
         foreach ($healthUnits as $healthUnitArrayKey => $healthUnit) {
+            $bedArray = [];
             $resultArray[$healthUnitArrayKey]['health_unit'] = $healthUnit->toArray();
             $beds = (new Bed())
                 ->where('health_unit_id', '=', $healthUnit->id)
